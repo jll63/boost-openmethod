@@ -3,6 +3,24 @@
 # See accompanying file LICENSE_1_0.txt
 # or copy at http://www.boost.org/LICENSE_1_0.txt)
 
+if (CMAKE_BUILD_TYPE MATCHES "Release")
+  if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    add_compile_options(-save-temps -masm=intel)
+  endif()
+endif()
+
+add_executable(hello_world hello_world.cpp)
+target_link_libraries(hello_world Boost::openmethod)
+add_test(NAME hello_world COMMAND hello_world)
+
+add_executable(core_api core_api.cpp)
+target_link_libraries(core_api Boost::openmethod)
+add_test(NAME core_api COMMAND core_api)
+
+add_executable(virtual_ptr virtual_ptr.cpp)
+target_link_libraries(virtual_ptr Boost::openmethod)
+add_test(NAME virtual_ptr COMMAND virtual_ptr)
+
 add_executable(slides slides.cpp)
 target_link_libraries(slides Boost::openmethod)
 add_test(NAME slides COMMAND slides)

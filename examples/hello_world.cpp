@@ -4,6 +4,7 @@
 // or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 #include <iostream>
+
 #include <boost/openmethod.hpp>
 #include <boost/openmethod/compiler.hpp>
 
@@ -11,25 +12,22 @@ struct Animal {
     virtual ~Animal() = default;
 };
 
-
 struct Cat : Animal {
 };
-
 
 struct Dog : Animal {
 };
 
-
 BOOST_OPENMETHOD(
-    poke, (std::ostream&, virtual_<const Animal&>), void);
+    poke, (std::ostream&, virtual_<Animal&>), void);
 
 BOOST_OPENMETHOD_OVERRIDE(
-    poke, (std::ostream& os, const Cat& cat), void) {
+    poke, (std::ostream& os, Cat& cat), void) {
         os << "hiss";
 }
 
 BOOST_OPENMETHOD_OVERRIDE(
-    poke, (std::ostream& os, const Dog& dog), void) {
+    poke, (std::ostream& os, Dog& dog), void) {
         os << "bark";
 }
 
@@ -41,7 +39,7 @@ struct Bulldog : Dog {
 BOOST_OPENMETHOD_CLASSES(Dog, Bulldog);
 
 BOOST_OPENMETHOD_OVERRIDE(
-    poke, (std::ostream& os, const Bulldog& dog), void) {
+    poke, (std::ostream& os, Bulldog& dog), void) {
         next(os, dog); // prints "bark"
         os << " and bite";
 }
@@ -70,20 +68,20 @@ BOOST_OPENMETHOD_OVERRIDE(encounter, (std::ostream& os, Cat& cat, Dog& dog), voi
 int main() {
     boost::openmethod::initialize();
 
-    Animal&& a = Cat();
-    Animal&& b = Dog();
+    std::unique_ptr<Animal> a(new Cat);
+    std::unique_ptr<Animal> b(new Dog);
 
-    poke(std::cout, a); // prints "hiss"
+    poke(std::cout, *a); // prints "hiss"
     std::cout << "\n";
 
-    poke(std::cout, b); // prints "bark"
+    poke(std::cout, *b); // prints "bark"
     std::cout << "\n";
 
-    Animal&& c = Bulldog();
-    poke(std::cout, c); // prints "bark and bite"
+    std::unique_ptr<Animal> c(new Bulldog);
+    poke(std::cout, *c); // prints "bark and bite"
     std::cout << "\n";
 
-    encounter(std::cout, a, b); // prints "run"
+    encounter(std::cout, *a, *b); // prints "run"
     std::cout << "\n";
 
     return 0;

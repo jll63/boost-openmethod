@@ -56,13 +56,13 @@ endif::[]
 [[distribution]]
 == Distribution
 
+
 OpenMethod is distributed under the http://www.boost.org/LICENSE_1_0.txt[Boost Software License, Version 1.0].
 
 There are three distribution channels:
 
 * OpenMethod is included in official https://www.boost.org/[Boost] releases (starting with Boost 1.75), and therefore available via most package managers.
 * The source code is hosted on https://github.com/boostorg/OpenMethod[GitHub].
-* For maximum portability, the latest OpenMethod release is also available in single-header format: link:https://raw.githubusercontent.com/boostorg/OpenMethod/gh-pages/OpenMethod.hpp[OpenMethod.hpp] (direct download link).
 
 == Motivation
 
@@ -113,26 +113,26 @@ functions (on the left side) and open-methods (on the right side):
 
 struct Animal {
     virtual ~Animal() = default;
-    virtual void poke(std::ostream&) const = 0;
+    virtual void poke(std::ostream&) = 0;
 };
 
 struct Cat : Animal {
-    void poke(std::ostream& os) const override;
+    void poke(std::ostream& os) override;
 };
 
 struct Dog : Animal {
-    void poke(std::ostream& os) const override;
+    void poke(std::ostream& os) override;
 };
 
 
 
 
-void Cat::poke(std::ostream& os) const override {
+void Cat::poke(std::ostream& os) override {
     os << "hiss";
 }
 
 
-void Dog::poke(std::ostream& os) const override {
+void Dog::poke(std::ostream& os) override {
     os << "bark";
 }
 
@@ -146,7 +146,10 @@ int main() {
     Animal&& b = Dog();
 
     a.poke(std::cout); // prints "hiss"
+    std::cout << "\n";
+
     a.poke(std::cout); // prints "bark"
+    std::cout << "\n";
 
     return 0;
 }
@@ -174,15 +177,15 @@ struct Dog : Animal {                         <3>
 
 
 BOOST_OPENMETHOD(                             <4>
-    poke, (std::ostream&, virtual_<const Animal&>), void);
+    poke, (std::ostream&, virtual_<Animal&>), void);
 
 BOOST_OPENMETHOD_OVERRIDE(                    <5>
-    poke, (std::ostream& os, const Cat& cat), void) {
+    poke, (std::ostream& os, Cat& cat), void) {
         os << "hiss";
 }
 
 BOOST_OPENMETHOD_OVERRIDE(                    <5>
-    poke, (std::ostream& os, const Dog& dog), void) {
+    poke, (std::ostream& os, Dog& dog), void) {
         os << "bark";
 }
 
@@ -191,11 +194,14 @@ BOOST_OPENMETHOD_CLASSES(Animal, Cat, Dog);   <6>
 int main() {
     boost::openmethod::initialize();          <7>
 
-    Animal&& a = Cat();
-    Animal&& b = Dog();
+    std::unique_ptr<Animal> a(new Cat);
+    std::unique_ptr<Animal> b(new Dog);
 
     poke(std::cout, a); // prints "hiss"      <8>
+    std::cout << "\n";
+
     poke(std::cout, b); // prints "bark"      <8>
+    std::cout << "\n";
 
     return 0;
 }
@@ -227,33 +233,6 @@ relationships.  This can be done incrementally.
 <8> `poke` is called as a free function. The appropriate override is called,
 depending on the dynamic type if the virtual argument.
 
-If we break it down, we see that the same information is present in both, only
-it has moved around in the method version:
-
-* The implicit `this` parameter is explicit in the method signature. The virtual
-function's cv-qualifier is now applied to the virtual parameter.
-
-* `virtual` has moved to the is replaced by `virtual_<const Animal&>` has become
-a `virtual_` decorator
-
-Incidentally, there is no obligation for the `const Animal&` to be the first
-method parameter. `virtual_` can appear anywhere, any number of times. At least
-one parameter must be  `virtual_`.
-
-At this point, we can neither call the method, nor the virtual function. We need
-to provide overrides.
-
-There are a couple of differences between the two though.
-
-* The open-method is not a member of `Animal`. We can add as many methods about
-Animals as we please, without chaning the classes.
-
- * Adding a pure virtual function to a class makes it abstract - it cananot be
- instantiated. It is not the case with open-methods. Whether or not an
- implementation exists cannot be checked by looking at one translation unit at a
- time. Calling a method with a combination of arguments that does not match any
- method override is a run-time error.
-
 === Next
 
 If a virtual function overrides a non-pure virtual function, it typically calls
@@ -283,23 +262,23 @@ Open-methods can have more than one virtual parameter.
 [source,c++]
 ----
 BOOST_OPENMETHOD(
-    std::ostream&, encounter, (virtual_<Animal&>, virtual_<Animal&>), void);
+    encounter, (std::ostream&, virtual_<Animal&>, virtual_<Animal&>), void);
 
 // 'encounter' catch-all implementation.
-BOOST_OPENMETHOD_OVERRIDE(std::ostream& os, encounter, (Animal&, Animal&, void)) {
+BOOST_OPENMETHOD_OVERRIDE(encounter, (std::ostream& os, Animal&, Animal&), void) {
     os << "ignore";
 }
 
 // Add definitions for specific pairs of animals.
-BOOST_OPENMETHOD_OVERRIDE(std::ostream& os, encounter, (Dog& dog1, Dog& dog2, void)) {
+BOOST_OPENMETHOD_OVERRIDE(encounter, (std::ostream& os, Dog& dog1, Dog& dog2), void) {
     os << "wag tail";
 }
 
-BOOST_OPENMETHOD_OVERRIDE(std::ostream& os, encounter, (Dog& dog, Cat& cat, void)) {
+BOOST_OPENMETHOD_OVERRIDE(encounter, (std::ostream& os, Dog& dog, Cat& cat), void) {
     os << "chase";
 }
 
-BOOST_OPENMETHOD_OVERRIDE(std::ostream& os, encounter, (Cat& cat, Dog& dog, void)) {
+BOOST_OPENMETHOD_OVERRIDE(encounter, (std::ostream& os, Cat& cat, Dog& dog), void) {
     os << "run";
 }
 ----
@@ -319,15 +298,130 @@ the method's arguments to the types required by the overrider.
 
 === Friendship
 
+=== Performance
+
+Open methods are almost as fast as ordinary virtual member functions when
+compiled with optimization. For both clang and gcc, dispatching a call to a
+method with one virtual argument takes 15-30% more time than calling the
+equivalent virtual member function (unless the call goes through a virtual base,
+which requires a dynamic cast). If the body of the method does any amount of
+work, the difference is unnoticeable.
+
+Here is the assembly code generated by clang for the `poke` method compiled for
+the x64 architecture (variable names have been shortened for readability):
+
+[source,asm]
+----
+	mov	    rax, qword ptr [rsi]
+	mov	    rdx, qword ptr [rip + hash_mult]
+	imul	rdx, qword ptr [rax - 8]
+	movzx	ecx, byte ptr [rip + hash_shift]
+	shr	    rdx, cl
+	mov	    rax, qword ptr [rip + vptrs]
+	mov	    rax, qword ptr [rax + 8*rdx]
+	mov	    rcx, qword ptr [rip + slots_strides]
+	mov	    rax, qword ptr [rax + 8*rcx]
+	jmp	    rax
+----
+
+The library uses a collision-free hash table to find the dispatch table
+(v-table) from the object's native type id (). The hash function is very simple
+and very fast: `H(obj) = (&typeid(obj) * M) >> S`. The result is the index of
+the open-method v-table in a global array of v-tables.
+
+This code performs the following logical steps. When a step contains multiple
+instructions, they can be executed in parallel on modern processors. The exact
+order in which the steps are executed depends on the processor.
+
+1. Load the two hash function factors (M and S), a pointer to a hash table,
+   the v-table pointer from the object, and the offset of the method in the
+   v-table.
+
+2. Multiply the address of the `type_info` by M.
+
+3. Shift the result right by S.
+
+4. Load the v-table pointer from the global array of v-tables.
+
+5. Load the function pointer from the v-table.
+
+6. Call (or jump to) the function.
+
+Analyzing the code with tools like uiCA or llvm-mca shows a throughput of 4
+cycles per dispatch. Comparatively, calling a native virtual functions takes one
+cycle. However, the difference is amortized by the time spent passing the
+arguments and returning from the function; plus, of course, executing the body
+of the function.
+
+Micro benchmarks suggest that the overhead of dispatching an open-methods with a
+single virtual argument is between 30% and 50% slower than calling the
+equivalent virtual function, if the body is empty.
+
 === `virtual_ptr`
+
+The seven first instructions in the assembly code above look up the v-table for
+the object. The result will always be the same for the same object. Therefore,
+that pointer can be re-used for subsequent calls.
+
+`virtual_ptr` is a fat pointer that contains two pointers: one to the object,
+and the other to the v-table. Incidentally, this is how Rust and Golang
+implement polymorphism.
+
+`virtual_ptr`{empty}s are used in place of `virtual_<&>`. They can be passed
+through to overriders, which can re-use them to make further method calls. For
+example:
+
+[source,c++]
+----
+BOOST_OPENMETHOD(vocalize, (std::ostream&, virtual_ptr<Animal>), void);
+
+BOOST_OPENMETHOD_OVERRIDE(
+    vocalize, (std::ostream & os, virtual_ptr<Cat> cat), void) {
+    os << "hiss";
+}
+
+BOOST_OPENMETHOD_OVERRIDE(
+    vocalize, (std::ostream & os, virtual_ptr<Dog> dog), void) {
+    os << "bark";
+}
+
+BOOST_OPENMETHOD(
+    encounter, (std::ostream&, virtual_ptr<Animal>, virtual_ptr<Animal>), void);
+
+BOOST_OPENMETHOD_OVERRIDE(
+    encounter, (std::ostream & os, virtual_ptr<Dog> dog, virtual_ptr<Cat> cat),
+    void) {
+    vocalize(os, dog);
+    os << " and chase";
+}
+
+BOOST_OPENMETHOD_OVERRIDE(
+    encounter, (std::ostream & os, virtual_ptr<Cat> cat, virtual_ptr<Dog> dog),
+    void) {
+    vocalize(os, cat);
+    os << " and run";
+}
+----
+
+Calls to `vocalize` compile to three instructions:
+
+[source,asm]
+----
+	mov	rax, qword ptr [rip + slots_strides]
+	mov	rax, qword ptr [rdx + 8*rax]
+	jmp	rax
+----
+
+This executes in one cycle, like native virtual function calls.
+
+NOTE: calling `initialize` invalidates all existing `virtual_ptr`{empty}s.
 
 == Advanced Features
 
 === Core API
 
-OpenMethod provides a public interface that does not require using macros. This
-can be useful in certain situations, for example when combining open methods and
-templates.
+OpenMethod provides a macro-free interface. This is be useful in certain
+situations, for example when combining open methods and templates.
 
 Here is a rewrite of the Animals example.
 
@@ -340,7 +434,7 @@ using namespace boost::openmethod;
 class poke_openmethod;
 
 using poke = method<
-    poke_openmethod(std::ostream&, virtual_<const Animal&>), void>;
+    poke_openmethod(std::ostream&, virtual_<Animal&>), void>;
 ----
 
 An open-method is implemented as an instance of the `method` template. It takes
@@ -358,7 +452,7 @@ name can get tedious, so OpenMethod provides a macro for that:
 class BOOST_OPENMETHOD_NAME(pet);
 
 using pet = method<
-    BOOST_OPENMETHOD_NAME(pet)(std::ostream&, virtual_<const Animal&>), void>;
+    BOOST_OPENMETHOD_NAME(pet)(std::ostream&, virtual_<Animal&>), void>;
 ----
 
 NOTE: BOOST_OPENMETHOD and associated macros use `BOOST_OPENMETHOD_NAME` in
@@ -377,22 +471,22 @@ Overriders are ordinary functions, added to a method using the nested template
 
 [source,c++]
 ----
-auto poke_cat(std::ostream& os, const Cat& cat), void) {
+auto poke_cat(std::ostream& os, Cat& cat, void) {
     os << "hiss";
 }
 
 static poke::override<poke_cat> override_poke_cat;
 ----
 
-If we are using C++26, we can use `_` instead of inventing an identifier. Again, OpenMethod provides a small convenience macro for this:
-
 NOTE: `override` can register more than one overrider.
+
+If we are using C++26, we can use `_` instead of inventing an identifier. Again, OpenMethod provides a small convenience macro for this:
 
 [source,c++]
 ----
 #include <boost/openmethod/macros/register.hpp>
 
-auto poke_dog(std::ostream& os, const Dog& dog), void) {
+auto poke_dog(std::ostream& os, Dog& dog, void) {
     os << "bark";
 }
 
@@ -404,13 +498,18 @@ BOOST_OPENMETHOD_REGISTER(poke::override<poke_dog>);
 [source,c++]
 ----
 
-auto poke_bulldog(std::ostream& os, const Bulldog& dog), void) {
+auto poke_bulldog(std::ostream& os, Bulldog& dog, void) -> void {
     poke::next<poke_bulldog>(os, dog);
     os << " and bite";
 }
 
 BOOST_OPENMETHOD_REGISTER(poke::override<poke_bulldog>);
 ----
+
+NOTE: Since the function uses itself as a template argument in its body, its
+return type cannot be deduced. It must be specified explicitly, either by using
+the old style or a trailing return type.
+
 
 Why not call `poke_dog` directly? That may be the right thing to do; however,
 keep in mind that, in a real program, a translation unit is not necessarily
@@ -439,7 +538,169 @@ int main() {
 }
 ----
 
-=== Policies
+=== Policies and Facets
+
+Methods and classes are scoped in a policy. A method can only reference classes
+registered in the same policy. If a class is used as a virtual parameter in
+methods using different policies, it must be registered with each of them.
+
+Class templates `use_classes`, `method`, `virtual_ptr`, and macros
+`BOOST_OPENMETHOD` and `BOOST_OPENMETHOD_CLASSES`, accept an additional
+argument, a policy class, which defaults to `policies::debug` in debug builds,
+and `policies::release` in release builds.
+
+A policy has a collection of _facets_. Facets control how type information is
+obtained, how vptrs are fetched, how errors are handled and printed, etc. Some
+are used in `initialize` and method dispatch; some are used by other facets in
+the same policy as part of their implementation. See the reference for a list of
+facets and stock implementations.
+
+`policies::release` contains the following facets:
+
+[cols="1,1,1"]
+|===
+|facet |implementation |role
+
+| rtti
+| std_rtti
+| provide type information for classes and objects
+
+| vptr
+| vptr_vector
+| store vptrs in a global vector
+
+| type_hash
+| fast_perfect_hash
+|
+
+| error_handler
+| vectored_error_handler
+|
+
+|===
+
+* `rtti`
+
+- `class vptr`: obtain a vptr from a virtual argument
+
+- `class error_handler`: handle errors
+
+- `class trace_output`: explain how the dispatch tables are built
+
+A policy needs not contain all the facets. Only the `rtti` facet is required.
+If, for example, a policy does not contain an
+
+
+
+Policies consist of a collection of _facets_, which are classes derived from:
+
+Facets `vptr` and `error_handler` are used during method dispatch. Facets
+`error_handler` and `tracing` are used while building the dispatch tables
+(`initalize`).
+
+Implementation of facets can use other facets in the same policy:
+
+- `class rtti`: provide a type id for an object or a class
+
+- `class type_hash`: hash a type id
+
+-
+
+
+
+ For example,
+the default policy uses the `vptr_vector` implementation of the `vptr` facet. It
+uses a `rtti` facet, which provides a type id information. By default,
+`std_rtti` is used. If a `hash_type` facet is present, it is used to hash the
+type id. By default, `fast_perfect_hash` is used.
+
+
+Class registrations and methods are scoped in a policy. A method can only
+reference classes registered in the same policy. If a class is used as a virtual
+parameter in methods using different policies, it must be registered with each
+of them.
+
+A policy has a collection of _facets_, implemented as classes inherited by the
+policy via inheritance.  Facets control how vptrs are fetched, errors are
+handled, etc. Facets fall into categories, and sometimes sub-categories. A
+policy can have at most one facet per category. Some facet categories may be
+absent from a policy; in which case, the corresponding functionality is not
+available.
+
+OpenMethod supports the following facet categories, and provides at least one
+implementation for each category. They are summed up in the following table.
+
+(facet sub-categories are in italics)
+
+| Facet category                  | Responsibility                    | Stock implementations                                                            |
+| ------------------------------- | --------------------------------- | -------------------------------------------------------------------------------- |
+| [vptr](/OpenMethod/reference/policy-vptr.html)         | fetch vptr for virtual argument   |                                                                                  |
+| *[external_vptr](/OpenMethod/reference/policy-vptr.html)*        | store vptr outside the object     | [vptr_vector](/OpenMethod/reference/policy-vptr_vector.html) (D) (R), [vptr_map](/OpenMethod/reference/policy-vptr_map.html)                                  |
+| [rtti](/OpenMethod/reference/policy-rtti.html)                   | provide type information          | [std_rtti](/OpenMethod/reference/policy-std_rtti.html) (D) (R), [minimal_rtti](/OpenMethod/reference/policy-minimal_rtti.html)                                 |
+| *[deferred_static_rtti](/OpenMethod/reference/policy-rtti.html)* | as `rtti`, but avoid static ctors |                                                                                  |
+| [type_hash](/OpenMethod/reference/policy-type_hash.html)              | map type info to integer index    | [fast_perfect_hash](/OpenMethod/reference/policy-fast_perfect_hash.html) (R), [checked_perfect_hash](/OpenMethod/reference/policy-checked_perfect_hash.html) (D)                |
+| [error_handler](/OpenMethod/reference/policy-error_handler.html)          | report errors                     | [vectored_error](/OpenMethod/reference/policy-vectored_error.html), [throw_error](/OpenMethod/reference/policy-throw_error.html), backward_compatible_error_handler |
+| [error_output](/OpenMethod/reference/policy-error_output.html)           | print diagnostics                 | [basic_error_output](/OpenMethod/reference/policy-basic_error_output.html) (D)                                                  |
+| [trace_output](/OpenMethod/reference/policy-trace_output.html)           | trace                             | [basic_trace_output](/OpenMethod/reference/policy-basic_trace_output.html) (D)                                                  |
+
+(D) denotes facets used in the default policy for debug variants, (R) for release
+variants.
+
+Several facets are [CRTP](https://en.cppreference.com/w/cpp/language/crtp) class
+templates, taking the policy as the first template argument. Some facets contain
+static, global data; parameterizing the facet by the policy ensures that each
+policy gets its own global data. Some facets also need to access other facets in
+the same policy.
+
+The stock policies consist of the following facets:
+
+* **debug**: for error detection and trace. Consists of std_rtti,
+  checked_perfect_hash, vptr_vector, basic_error_output, basic_trace_output and
+  backward_compatible_error_handler.
+
+* **release**: for maximum performance. Consists of fast_perfect_hash,
+  vptr_vector, std_rtti and backward_compatible_error_handler.
+
+* **debug_shared**: consists of vptr_vector, std_rtti, checked_perfect_hash,
+  basic_error_output, basic_trace_output and backward_compatible_error_handler.
+  The member function and variables are declared as external in the headers, and
+  explicitly instantiated in the shared library.
+
+* **release_shared**: same as debug_shared, but checkeds are bypassed.
+
+## Overriding the default policy
+
+`boost::openmethod::default_policy` is an alias to one of these four policies,
+depending on the value of preprocessor symbols `NDEBUG` and `OpenMethod_SHARED`. It
+is used as the default value for the Policy template parameter in `use_classes`,
+`method`, `virtual_ptr` (and its associated helper functions). This can be
+overriden by defining `OpenMethod_DEFAULT_POLICY` _before_ including
+`<yorel/OpenMethod/core.hpp>`. If the policy is not a stock policy, header
+`<yorel/OpenMethod/policy.hpp>` can be included to access the policy and facet
+mechanisms.
+
+**Use with caution**, this can easily cause ODR violations. Overriding should be
+done from a single header, which should be included in place of any OpenMethod
+header, by all the source files in all the programs and libraries in a project.
+A reasonable example would be a header to be used in UnReal programs and
+libraries, to use custom RTTI.
+
+See [`vptr`](/OpenMethod/reference/policy-vptr.html) for an example.
+
+## Example
+
+Given a `rtti` facet implementation, `custom_rtti`, that maps types to a dense
+range of integer values. We want to create a policy that is the same as the
+default policy in every aspect, except that it uses custom RTTI. In addition, we
+don't need to hash the integer type id, so we remove the `type_hash` facet:
+
+```c++
+struct custom_policy : default_policy
+  ::rebind<custom_policy>
+  ::replace<policy::rtti, custom_rtti>
+  ::remove<policy::type_hash> {
+};
+```
 
 === Error Handling
 
@@ -478,3 +739,47 @@ int main() {
 ==== virtual_
 
 ==== virtual_ptr
+
+==== policies::basic_policy
+
+
+ Facets are similar to C++20 concepts: they indicate that certain
+ functionalities are available in the policy, but most do not provide them; that
+ is the role of a _facet implementation_, which is similar to a model of a
+ concept in C++20.
+
+
+OpenMethod provides the following facets and facet implementations.
+
+[cols="a,a,a", options="header"]
+|===
+| Facet
+| Responsibility
+| Implementation
+
+| vptr_placement
+|
+|
+| external_vptr
+|
+|
+| rtti
+|
+|
+| deferred_static_rtti
+|
+|
+| type_hash
+|
+|
+| error_handler
+|
+|
+| error_output
+|
+|
+| trace_output
+|
+|
+
+|===

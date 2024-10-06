@@ -63,11 +63,10 @@ namespace policies {
 struct abstract_policy {};
 
 struct error_handler {};
-struct runtime_checks {};
 struct indirect_vptr {};
 struct type_hash {};
-struct vptr_placement {};
-struct external_vptr : virtual vptr_placement {};
+struct vptr {};
+struct external_vptr : virtual vptr {};
 struct error_output {};
 struct trace_output {};
 

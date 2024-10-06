@@ -606,9 +606,7 @@ class method<Name(Parameters...), Return, Policy> : public detail::method_info {
     auto resolve_uni(const ArgType& arg, const MoreArgTypes&... more_args) const
         -> std::uintptr_t;
 
-    template<
-        std::size_t VirtualArg, typename MethodArgList, typename ArgType,
-        typename... MoreArgTypes>
+    template<typename MethodArgList, typename ArgType, typename... MoreArgTypes>
     auto resolve_multi_first(
         const ArgType& arg, const MoreArgTypes&... more_args) const
         -> std::uintptr_t;
@@ -776,7 +774,7 @@ BOOST_FORCEINLINE
     if constexpr (Arity == 1) {
         pf = resolve_uni<types<Parameters...>, ArgType...>(args...);
     } else {
-        pf = resolve_multi_first<0, types<Parameters...>, ArgType...>(args...);
+        pf = resolve_multi_first<types<Parameters...>, ArgType...>(args...);
     }
 
     return reinterpret_cast<FunctionPointer>(pf);
@@ -830,9 +828,7 @@ BOOST_FORCEINLINE auto method<Name(Parameters...), Return, Policy>::resolve_uni(
 }
 
 template<typename Name, typename Return, typename... Parameters, class Policy>
-template<
-    std::size_t VirtualArg, typename MethodArgList, typename ArgType,
-    typename... MoreArgTypes>
+template<typename MethodArgList, typename ArgType, typename... MoreArgTypes>
 BOOST_FORCEINLINE auto
 method<Name(Parameters...), Return, Policy>::resolve_multi_first(
     const ArgType& arg, const MoreArgTypes&... more_args) const
