@@ -1,0 +1,17 @@
+#ifndef BOOST_OPENMETHOD_TEST_HELPERS_HPP
+#define BOOST_OPENMETHOD_TEST_HELPERS_HPP
+
+#include <boost/openmethod/core.hpp>
+#include <boost/openmethod/compiler.hpp>
+
+template<int Name>
+struct test_policy_ :
+#ifdef NDEBUG
+    boost::openmethod::policies::release::rebind<test_policy_<Name>>
+#else
+    boost::openmethod::policies::debug::rebind<test_policy_<Name>>
+#endif
+{
+};
+
+#endif
