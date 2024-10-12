@@ -42,13 +42,14 @@ function switch_style()
 <li><a href="#_multiple_dispatch">Multiple Dispatch</a></li>
 <li><a href="#_multiple_inheritance">Multiple Inheritance</a></li>
 <li><a href="#_friendship">Friendship</a></li>
+<li><a href="#_performance">Performance</a></li>
 <li><a href="#_virtual_ptr"><code>virtual_ptr</code></a></li>
 </ul>
 </li>
 <li><a href="#_advanced_features">Advanced Features</a>
 <ul class="sectlevel2">
 <li><a href="#_core_api">Core API</a></li>
-<li><a href="#_policies">Policies</a></li>
+<li><a href="#_policies_and_facets">Policies and Facets</a></li>
 <li><a href="#_error_handling">Error Handling</a></li>
 <li><a href="#_custom_rtti">Custom RTTI</a></li>
 </ul>
@@ -75,6 +76,7 @@ function switch_style()
 <li><a href="#_methodoverride_fn">method::override_fn</a></li>
 <li><a href="#_virtual">virtual_</a></li>
 <li><a href="#_virtual_ptr_2">virtual_ptr</a></li>
+<li><a href="#_policiesbasic_policy">policies::basic_policy</a></li>
 </ul>
 </li>
 </ul>
@@ -237,26 +239,26 @@ functions (on the left side) and open-methods (on the right side):</p>
 
 struct Animal {
     virtual ~Animal() = default;
-    virtual void poke(std::ostream&amp;) const = 0;
+    virtual void poke(std::ostream&amp;) = 0;
 };
 
 struct Cat : Animal {
-    void poke(std::ostream&amp; os) const override;
+    void poke(std::ostream&amp; os) override;
 };
 
 struct Dog : Animal {
-    void poke(std::ostream&amp; os) const override;
+    void poke(std::ostream&amp; os) override;
 };
 
 
 
 
-void Cat::poke(std::ostream&amp; os) const override {
+void Cat::poke(std::ostream&amp; os) override {
     os &lt;&lt; "hiss";
 }
 
 
-void Dog::poke(std::ostream&amp; os) const override {
+void Dog::poke(std::ostream&amp; os) override {
     os &lt;&lt; "bark";
 }
 
@@ -270,7 +272,10 @@ int main() {
     Animal&amp;&amp; b = Dog();
 
     a.poke(std::cout); // prints "hiss"
+    std::cout &lt;&lt; "\n";
+
     a.poke(std::cout); // prints "bark"
+    std::cout &lt;&lt; "\n";
 
     return 0;
 }</code></pre>
@@ -296,15 +301,15 @@ struct Dog : Animal {                         <i class="conum" data-value="3"></
 
 
 BOOST_OPENMETHOD(                             <i class="conum" data-value="4"></i><b>(4)</b>
-    poke, (std::ostream&amp;, virtual_&lt;const Animal&amp;&gt;), void);
+    poke, (std::ostream&amp;, virtual_&lt;Animal&amp;&gt;), void);
 
 BOOST_OPENMETHOD_OVERRIDE(                    <i class="conum" data-value="5"></i><b>(5)</b>
-    poke, (std::ostream&amp; os, const Cat&amp; cat), void) {
+    poke, (std::ostream&amp; os, Cat&amp; cat), void) {
         os &lt;&lt; "hiss";
 }
 
 BOOST_OPENMETHOD_OVERRIDE(                    <i class="conum" data-value="5"></i><b>(5)</b>
-    poke, (std::ostream&amp; os, const Dog&amp; dog), void) {
+    poke, (std::ostream&amp; os, Dog&amp; dog), void) {
         os &lt;&lt; "bark";
 }
 
@@ -313,11 +318,14 @@ BOOST_OPENMETHOD_CLASSES(Animal, Cat, Dog);   <i class="conum" data-value="6"></
 int main() {
     boost::openmethod::initialize();          <i class="conum" data-value="7"></i><b>(7)</b>
 
-    Animal&amp;&amp; a = Cat();
-    Animal&amp;&amp; b = Dog();
+    std::unique_ptr&lt;Animal&gt; a(new Cat);
+    std::unique_ptr&lt;Animal&gt; b(new Dog);
 
     poke(std::cout, a); // prints "hiss"      <i class="conum" data-value="8"></i><b>(8)</b>
+    std::cout &lt;&lt; "\n";
+
     poke(std::cout, b); // prints "bark"      <i class="conum" data-value="8"></i><b>(8)</b>
+    std::cout &lt;&lt; "\n";
 
     return 0;
 }</code></pre>
@@ -371,49 +379,6 @@ depending on the dynamic type if the virtual argument.</td>
 </tr>
 </table>
 </div>
-<div class="paragraph">
-<p>If we break it down, we see that the same information is present in both, only
-it has moved around in the method version:</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>The implicit <code>this</code> parameter is explicit in the method signature. The virtual
-function&#8217;s cv-qualifier is now applied to the virtual parameter.</p>
-</li>
-<li>
-<p><code>virtual</code> has moved to the is replaced by <code>virtual_&lt;const Animal&amp;&gt;</code> has become
-a <code>virtual_</code> decorator</p>
-</li>
-</ul>
-</div>
-<div class="paragraph">
-<p>Incidentally, there is no obligation for the <code>const Animal&amp;</code> to be the first
-method parameter. <code>virtual_</code> can appear anywhere, any number of times. At least
-one parameter must be  <code>virtual_</code>.</p>
-</div>
-<div class="paragraph">
-<p>At this point, we can neither call the method, nor the virtual function. We need
-to provide overrides.</p>
-</div>
-<div class="paragraph">
-<p>There are a couple of differences between the two though.</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>The open-method is not a member of <code>Animal</code>. We can add as many methods about
-Animals as we please, without chaning the classes.</p>
-</li>
-<li>
-<p>Adding a pure virtual function to a class makes it abstract - it cananot be
-instantiated. It is not the case with open-methods. Whether or not an
-implementation exists cannot be checked by looking at one translation unit at a
-time. Calling a method with a combination of arguments that does not match any
-method override is a run-time error.</p>
-</li>
-</ul>
-</div>
 </div>
 <div class="sect2">
 <h3 id="_next">Next</h3>
@@ -447,23 +412,23 @@ BOOST_OPENMETHOD_OVERRIDE(
 <div class="listingblock">
 <div class="content">
 <pre class="rouge highlight nowrap"><code data-lang="c++">BOOST_OPENMETHOD(
-    std::ostream&amp;, encounter, (virtual_&lt;Animal&amp;&gt;, virtual_&lt;Animal&amp;&gt;), void);
+    encounter, (std::ostream&amp;, virtual_&lt;Animal&amp;&gt;, virtual_&lt;Animal&amp;&gt;), void);
 
 // 'encounter' catch-all implementation.
-BOOST_OPENMETHOD_OVERRIDE(std::ostream&amp; os, encounter, (Animal&amp;, Animal&amp;, void)) {
+BOOST_OPENMETHOD_OVERRIDE(encounter, (std::ostream&amp; os, Animal&amp;, Animal&amp;), void) {
     os &lt;&lt; "ignore";
 }
 
 // Add definitions for specific pairs of animals.
-BOOST_OPENMETHOD_OVERRIDE(std::ostream&amp; os, encounter, (Dog&amp; dog1, Dog&amp; dog2, void)) {
+BOOST_OPENMETHOD_OVERRIDE(encounter, (std::ostream&amp; os, Dog&amp; dog1, Dog&amp; dog2), void) {
     os &lt;&lt; "wag tail";
 }
 
-BOOST_OPENMETHOD_OVERRIDE(std::ostream&amp; os, encounter, (Dog&amp; dog, Cat&amp; cat, void)) {
+BOOST_OPENMETHOD_OVERRIDE(encounter, (std::ostream&amp; os, Dog&amp; dog, Cat&amp; cat), void) {
     os &lt;&lt; "chase";
 }
 
-BOOST_OPENMETHOD_OVERRIDE(std::ostream&amp; os, encounter, (Cat&amp; cat, Dog&amp; dog, void)) {
+BOOST_OPENMETHOD_OVERRIDE(encounter, (std::ostream&amp; os, Cat&amp; cat, Dog&amp; dog), void) {
     os &lt;&lt; "run";
 }</code></pre>
 </div>
@@ -491,8 +456,155 @@ the method&#8217;s arguments to the types required by the overrider.</p>
 
 </div>
 <div class="sect2">
+<h3 id="_performance">Performance</h3>
+<div class="paragraph">
+<p>Open methods are almost as fast as ordinary virtual member functions when
+compiled with optimization. For both clang and gcc, dispatching a call to a
+method with one virtual argument takes 15-30% more time than calling the
+equivalent virtual member function (unless the call goes through a virtual base,
+which requires a dynamic cast). If the body of the method does any amount of
+work, the difference is unnoticeable.</p>
+</div>
+<div class="paragraph">
+<p>Here is the assembly code generated by clang for the <code>poke</code> method compiled for
+the x64 architecture (variable names have been shortened for readability):</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight nowrap"><code data-lang="asm">	mov	    rax, qword ptr [rsi]
+	mov	    rdx, qword ptr [rip + hash_mult]
+	imul	rdx, qword ptr [rax - 8]
+	movzx	ecx, byte ptr [rip + hash_shift]
+	shr	    rdx, cl
+	mov	    rax, qword ptr [rip + vptrs]
+	mov	    rax, qword ptr [rax + 8*rdx]
+	mov	    rcx, qword ptr [rip + slots_strides]
+	mov	    rax, qword ptr [rax + 8*rcx]
+	jmp	    rax</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The library uses a collision-free hash table to find the dispatch table
+(v-table) from the object&#8217;s native type id (). The hash function is very simple
+and very fast: <code>H(obj) = (&amp;typeid(obj) * M) &gt;&gt; S</code>. The result is the index of
+the open-method v-table in a global array of v-tables.</p>
+</div>
+<div class="paragraph">
+<p>This code performs the following logical steps. When a step contains multiple
+instructions, they can be executed in parallel on modern processors. The exact
+order in which the steps are executed depends on the processor.</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Load the two hash function factors (M and S), a pointer to a hash table,
+the v-table pointer from the object, and the offset of the method in the
+v-table.</p>
+</li>
+<li>
+<p>Multiply the address of the <code>type_info</code> by M.</p>
+</li>
+<li>
+<p>Shift the result right by S.</p>
+</li>
+<li>
+<p>Load the v-table pointer from the global array of v-tables.</p>
+</li>
+<li>
+<p>Load the function pointer from the v-table.</p>
+</li>
+<li>
+<p>Call (or jump to) the function.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>Analyzing the code with tools like uiCA or llvm-mca shows a throughput of 4
+cycles per dispatch. Comparatively, calling a native virtual functions takes one
+cycle. However, the difference is amortized by the time spent passing the
+arguments and returning from the function; plus, of course, executing the body
+of the function.</p>
+</div>
+<div class="paragraph">
+<p>Micro benchmarks suggest that the overhead of dispatching an open-methods with a
+single virtual argument is between 30% and 50% slower than calling the
+equivalent virtual function, if the body is empty.</p>
+</div>
+</div>
+<div class="sect2">
 <h3 id="_virtual_ptr"><code>virtual_ptr</code></h3>
+<div class="paragraph">
+<p>The seven first instructions in the assembly code above look up the v-table for
+the object. The result will always be the same for the same object. Therefore,
+that pointer can be re-used for subsequent calls.</p>
+</div>
+<div class="paragraph">
+<p><code>virtual_ptr</code> is a fat pointer that contains two pointers: one to the object,
+and the other to the v-table. Incidentally, this is how Rust and Golang
+implement polymorphism.</p>
+</div>
+<div class="paragraph">
+<p><code>virtual_ptr</code>s are used in place of <code>virtual_&lt;&amp;&gt;</code>. They can be passed
+through to overriders, which can re-use them to make further method calls. For
+example:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight nowrap"><code data-lang="c++">BOOST_OPENMETHOD(vocalize, (std::ostream&amp;, virtual_ptr&lt;Animal&gt;), void);
 
+BOOST_OPENMETHOD_OVERRIDE(
+    vocalize, (std::ostream &amp; os, virtual_ptr&lt;Cat&gt; cat), void) {
+    os &lt;&lt; "hiss";
+}
+
+BOOST_OPENMETHOD_OVERRIDE(
+    vocalize, (std::ostream &amp; os, virtual_ptr&lt;Dog&gt; dog), void) {
+    os &lt;&lt; "bark";
+}
+
+BOOST_OPENMETHOD(
+    encounter, (std::ostream&amp;, virtual_ptr&lt;Animal&gt;, virtual_ptr&lt;Animal&gt;), void);
+
+BOOST_OPENMETHOD_OVERRIDE(
+    encounter, (std::ostream &amp; os, virtual_ptr&lt;Dog&gt; dog, virtual_ptr&lt;Cat&gt; cat),
+    void) {
+    vocalize(os, dog);
+    os &lt;&lt; " and chase";
+}
+
+BOOST_OPENMETHOD_OVERRIDE(
+    encounter, (std::ostream &amp; os, virtual_ptr&lt;Cat&gt; cat, virtual_ptr&lt;Dog&gt; dog),
+    void) {
+    vocalize(os, cat);
+    os &lt;&lt; " and run";
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Calls to <code>vocalize</code> compile to three instructions:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight nowrap"><code data-lang="asm">	mov	rax, qword ptr [rip + slots_strides]
+	mov	rax, qword ptr [rdx + 8*rax]
+	jmp	rax</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This executes in one cycle, like native virtual function calls.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+calling <code>initialize</code> invalidates all existing <code>virtual_ptr</code>s.
+</td>
+</tr>
+</table>
+</div>
 </div>
 </div>
 </div>
@@ -502,9 +614,8 @@ the method&#8217;s arguments to the types required by the overrider.</p>
 <div class="sect2">
 <h3 id="_core_api">Core API</h3>
 <div class="paragraph">
-<p>OpenMethod provides a public interface that does not require using macros. This
-can be useful in certain situations, for example when combining open methods and
-templates.</p>
+<p>OpenMethod provides a macro-free interface. This is be useful in certain
+situations, for example when combining open methods and templates.</p>
 </div>
 <div class="paragraph">
 <p>Here is a rewrite of the Animals example.</p>
@@ -518,7 +629,7 @@ using namespace boost::openmethod;
 class poke_openmethod;
 
 using poke = method&lt;
-    poke_openmethod(std::ostream&amp;, virtual_&lt;const Animal&amp;&gt;), void&gt;;</code></pre>
+    poke_openmethod(std::ostream&amp;, virtual_&lt;Animal&amp;&gt;), void&gt;;</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -538,7 +649,7 @@ name can get tedious, so OpenMethod provides a macro for that:</p>
 class BOOST_OPENMETHOD_NAME(pet);
 
 using pet = method&lt;
-    BOOST_OPENMETHOD_NAME(pet)(std::ostream&amp;, virtual_&lt;const Animal&amp;&gt;), void&gt;;</code></pre>
+    BOOST_OPENMETHOD_NAME(pet)(std::ostream&amp;, virtual_&lt;Animal&amp;&gt;), void&gt;;</code></pre>
 </div>
 </div>
 <div class="admonitionblock note">
@@ -569,15 +680,12 @@ styles.
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight nowrap"><code data-lang="c++">auto poke_cat(std::ostream&amp; os, const Cat&amp; cat), void) {
+<pre class="rouge highlight nowrap"><code data-lang="c++">auto poke_cat(std::ostream&amp; os, Cat&amp; cat, void) {
     os &lt;&lt; "hiss";
 }
 
 static poke::override&lt;poke_cat&gt; override_poke_cat;</code></pre>
 </div>
-</div>
-<div class="paragraph">
-<p>If we are using C++26, we can use <code>_</code> instead of inventing an identifier. Again, OpenMethod provides a small convenience macro for this:</p>
 </div>
 <div class="admonitionblock note">
 <table>
@@ -591,11 +699,14 @@ static poke::override&lt;poke_cat&gt; override_poke_cat;</code></pre>
 </tr>
 </table>
 </div>
+<div class="paragraph">
+<p>If we are using C++26, we can use <code>_</code> instead of inventing an identifier. Again, OpenMethod provides a small convenience macro for this:</p>
+</div>
 <div class="listingblock">
 <div class="content">
 <pre class="rouge highlight nowrap"><code data-lang="c++">#include &lt;boost/openmethod/macros/register.hpp&gt;
 
-auto poke_dog(std::ostream&amp; os, const Dog&amp; dog), void) {
+auto poke_dog(std::ostream&amp; os, Dog&amp; dog, void) {
     os &lt;&lt; "bark";
 }
 
@@ -607,13 +718,27 @@ BOOST_OPENMETHOD_REGISTER(poke::override&lt;poke_dog&gt;);</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight nowrap"><code data-lang="c++">auto poke_bulldog(std::ostream&amp; os, const Bulldog&amp; dog), void) {
+<pre class="rouge highlight nowrap"><code data-lang="c++">auto poke_bulldog(std::ostream&amp; os, Bulldog&amp; dog, void) -&gt; void {
     poke::next&lt;poke_bulldog&gt;(os, dog);
     os &lt;&lt; " and bite";
 }
 
 BOOST_OPENMETHOD_REGISTER(poke::override&lt;poke_bulldog&gt;);</code></pre>
 </div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+Since the function uses itself as a template argument in its body, its
+return type cannot be deduced. It must be specified explicitly, either by using
+the old style or a trailing return type.
+</td>
+</tr>
+</table>
 </div>
 <div class="paragraph">
 <p>Why not call <code>poke_dog</code> directly? That may be the right thing to do; however,
@@ -643,8 +768,129 @@ loading.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_policies">Policies</h3>
-
+<h3 id="_policies_and_facets">Policies and Facets</h3>
+<div class="paragraph">
+<p>Methods and classes are scoped in a policy. A method can only reference classes
+registered in the same policy. If a class is used as a virtual parameter in
+methods using different policies, it must be registered with each of them.</p>
+</div>
+<div class="paragraph">
+<p>Class templates <code>use_classes</code>, <code>method</code>, <code>virtual_ptr</code>, and macros
+<code>BOOST_OPENMETHOD</code> and <code>BOOST_OPENMETHOD_CLASSES</code>, accept an additional
+argument, a policy class, which defaults to <code>policies::debug</code> in debug builds,
+and <code>policies::release</code> in release builds.</p>
+</div>
+<div class="paragraph">
+<p>A policy has a collection of <em>facets</em>. Facets control how type information is
+obtained, how vptrs are fetched, how errors are handled and printed, etc. Some
+are used in <code>initialize</code> and method dispatch; some are used by other facets in
+the same policy as part of their implementation. See the reference for a list of
+facets and stock implementations.</p>
+</div>
+<div class="paragraph">
+<p><code>policies::release</code> contains the following facets:</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">facet</th>
+<th class="tableblock halign-left valign-top">implementation</th>
+<th class="tableblock halign-left valign-top">role</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">rtti</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">std_rtti</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">provide type information for classes and objects</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">vptr</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">vptr_vector</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">store vptrs in a global vector</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">type_hash</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">fast_perfect_hash</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">hash type id to an index in a vector</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">error_handler</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">vectored_error_handler</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">call a <code>std::function</code> when an error occurs</p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p><code>policies::debug</code> contains the same facets as <code>release</code>, plus a few more:</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">facet</th>
+<th class="tableblock halign-left valign-top">implementation</th>
+<th class="tableblock halign-left valign-top">role</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">runtime_checks</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">enable runtime checks</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">error_output</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">basic_error_output</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">print error descriptions to <code>stderr</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">trace_output</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">basic_trace_output</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">make <code>initialize</code> print information about dispatch table construction to  <code>stderr</code></p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>Policies, and some facets, have static variables. When it is the case, they are
+implemented as CRTP classes.</p>
+</div>
+<div class="paragraph">
+<p>Policies can be created from scratch, using the <code>basic_policy</code> template, or by
+adding or removing facets from existing policies. For example, <code>policies::debug</code>
+is a tweak of <code>policies::release</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight nowrap"><code data-lang="c++">struct debug : release::rebind&lt;debug&gt;::add&lt;
+                   runtime_checks, basic_error_output&lt;debug&gt;,
+                   basic_trace_output&lt;debug&gt;&gt; {};</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><code>rebind</code> creates a new policy from an existing one, substituting the new policy
+to the original one in all the CRTP classes. <code>add</code> adds three facets, two of
+which have state.</p>
+</div>
+<div class="paragraph">
+<p><code>boost::openmethod::policies::default_</code> is an alias to the <code>release</code> or <code>debug</code>
+policy, depending on the value of preprocessor symbols <code>NDEBUG</code>. The default
+policy can be overriden by defining the macroprocessor symbol
+<code>BOOST_OPENMETHOD_DEFAULT_POLICY</code> <em>before</em> including
+<code>&lt;boost/openmethod/core.hpp&gt;</code>. The value of the symbol is used as a default
+template parameter for <code>use_classes</code>, <code>method</code>, <code>virtual_ptr</code>, and others. Once
+the <code>core</code> header has been included, changing <code>BOOST_OPENMETHOD_DEFAULT_POLICY</code>
+has no effect. See below for examples.</p>
+</div>
 </div>
 <div class="sect2">
 <h3 id="_error_handling">Error Handling</h3>
@@ -719,6 +965,92 @@ loading.</p>
 <div class="sect3">
 <h4 id="_virtual_ptr_2">virtual_ptr</h4>
 
+</div>
+<div class="sect3">
+<h4 id="_policiesbasic_policy">policies::basic_policy</h4>
+<div class="literalblock">
+<div class="content">
+<pre class="nowrap">Facets are similar to C++20 concepts: they indicate that certain
+functionalities are available in the policy, but most do not provide them; that
+is the role of a _facet implementation_, which is similar to a model of a
+concept in C++20.</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>OpenMethod provides the following facets and facet implementations.</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Facet</th>
+<th class="tableblock halign-left valign-top">Responsibility</th>
+<th class="tableblock halign-left valign-top">Implementation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p>vptr_placement</p>
+</div></div></td>
+<td class="tableblock halign-left valign-top"><div class="content"></div></td>
+<td class="tableblock halign-left valign-top"><div class="content"></div></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p>external_vptr</p>
+</div></div></td>
+<td class="tableblock halign-left valign-top"><div class="content"></div></td>
+<td class="tableblock halign-left valign-top"><div class="content"></div></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p>rtti</p>
+</div></div></td>
+<td class="tableblock halign-left valign-top"><div class="content"></div></td>
+<td class="tableblock halign-left valign-top"><div class="content"></div></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p>deferred_static_rtti</p>
+</div></div></td>
+<td class="tableblock halign-left valign-top"><div class="content"></div></td>
+<td class="tableblock halign-left valign-top"><div class="content"></div></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p>type_hash</p>
+</div></div></td>
+<td class="tableblock halign-left valign-top"><div class="content"></div></td>
+<td class="tableblock halign-left valign-top"><div class="content"></div></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p>error_handler</p>
+</div></div></td>
+<td class="tableblock halign-left valign-top"><div class="content"></div></td>
+<td class="tableblock halign-left valign-top"><div class="content"></div></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p>error_output</p>
+</div></div></td>
+<td class="tableblock halign-left valign-top"><div class="content"></div></td>
+<td class="tableblock halign-left valign-top"><div class="content"></div></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p>trace_output</p>
+</div></div></td>
+<td class="tableblock halign-left valign-top"><div class="content"></div></td>
+<td class="tableblock halign-left valign-top"><div class="content"></div></td>
+</tr>
+</tbody>
+</table>
 </div>
 </div>
 </div>

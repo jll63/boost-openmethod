@@ -599,37 +599,32 @@ facets and stock implementations.
 
 |===
 
-`boost::openmethod::policies::default_` is an alias to one of these four policies,
-depending on the value of preprocessor symbols `NDEBUG` and `OpenMethod_SHARED`. It
-is used as the default value for the Policy template parameter in `use_classes`,
-`method`, `virtual_ptr` (and its associated helper functions). This can be
-overriden by defining `OpenMethod_DEFAULT_POLICY` _before_ including
-`<yorel/OpenMethod/core.hpp>`. If the policy is not a stock policy, header
-`<yorel/OpenMethod/policy.hpp>` can be included to access the policy and facet
-mechanisms.
+Policies, and some facets, have static variables. When it is the case, they are
+implemented as CRTP classes.
 
-**Use with caution**, this can easily cause ODR violations. Overriding should be
-done from a single header, which should be included in place of any OpenMethod
-header, by all the source files in all the programs and libraries in a project.
-A reasonable example would be a header to be used in UnReal programs and
-libraries, to use custom RTTI.
+Policies can be created from scratch, using the `basic_policy` template, or by
+adding or removing facets from existing policies. For example, `policies::debug`
+is a tweak of `policies::release`:
 
-See [`vptr`](/OpenMethod/reference/policy-vptr.html) for an example.
+[source,c++]
+----
+struct debug : release::rebind<debug>::add<
+                   runtime_checks, basic_error_output<debug>,
+                   basic_trace_output<debug>> {};
+----
 
-## Example
+`rebind` creates a new policy from an existing one, substituting the new policy
+to the original one in all the CRTP classes. `add` adds three facets, two of
+which have state.
 
-Given a `rtti` facet implementation, `custom_rtti`, that maps types to a dense
-range of integer values. We want to create a policy that is the same as the
-default policy in every aspect, except that it uses custom RTTI. In addition, we
-don't need to hash the integer type id, so we remove the `type_hash` facet:
-
-```c++
-struct custom_policy : policies::default_
-  ::rebind<custom_policy>
-  ::replace<policy::rtti, custom_rtti>
-  ::remove<policy::type_hash> {
-};
-```
+`boost::openmethod::policies::default_` is an alias to the `release` or `debug`
+policy, depending on the value of preprocessor symbols `NDEBUG`. The default
+policy can be overriden by defining the macroprocessor symbol
+`BOOST_OPENMETHOD_DEFAULT_POLICY` _before_ including
+`<boost/openmethod/core.hpp>`. The value of the symbol is used as a default
+template parameter for `use_classes`, `method`, `virtual_ptr`, and others. Once
+the `core` header has been included, changing `BOOST_OPENMETHOD_DEFAULT_POLICY`
+has no effect. See below for examples.
 
 === Error Handling
 
