@@ -10,6 +10,7 @@
 #include <random>
 
 #include <boost/openmethod/policies/core.hpp>
+#include <boost/openmethod/detail/empty_base.hpp>
 
 namespace boost {
 namespace openmethod {
@@ -27,25 +28,39 @@ struct fast_perfect_hash : virtual type_hash {
     static std::size_t hash_length;
     static std::size_t hash_min;
     static std::size_t hash_max;
+    static std::vector<type_id> control;
 
 #ifdef _MSC_VER
     __forceinline
 #endif
         static auto
         hash_type_id(type_id type) -> type_id {
-        return (hash_mult * type) >> hash_shift;
+
+        auto index = (hash_mult * type) >> hash_shift;
+
+        if constexpr (Policy::template has_facet<runtime_checks>) {
+            check(index, type);
+        }
+
+        return index;
     }
 
     template<typename ForwardIterator>
     static void hash_initialize(ForwardIterator first, ForwardIterator last) {
-        std::vector<type_id> buckets;
-        hash_initialize(first, last, buckets);
+        if constexpr (Policy::template has_facet<runtime_checks>) {
+            hash_initialize(first, last, control);
+        } else {
+            std::vector<type_id> buckets;
+            hash_initialize(first, last, buckets);
+        }
     }
 
     template<typename ForwardIterator>
     static void hash_initialize(
         ForwardIterator first, ForwardIterator last,
         std::vector<type_id>& buckets);
+
+    static void check(std::size_t index, type_id type);
 };
 
 template<class Policy>
@@ -116,11 +131,6 @@ void fast_perfect_hash<Policy>::hash_initialize(
             }
         }
 
-        // metrics.hash_search_attempts = total_attempts;
-        // metrics.hash_search_time =
-        //     std::chrono::steady_clock::now() - start_time;
-        // metrics.hash_table_size = hash_size;
-
         if (found) {
             hash_length = hash_max + 1;
 
@@ -139,7 +149,6 @@ void fast_perfect_hash<Policy>::hash_initialize(
 
     hash_search_error error;
     error.attempts = total_attempts;
-    // error.duration = std::chrono::steady_clock::now() - start_time;
     error.buckets = 1 << M;
 
     if constexpr (has_facet<Policy, error_handler>) {
@@ -147,6 +156,20 @@ void fast_perfect_hash<Policy>::hash_initialize(
     }
 
     abort();
+}
+
+template<class Policy>
+void fast_perfect_hash<Policy>::check(std::size_t index, type_id type) {
+    if (index >= hash_length || control[index] != type) {
+        if constexpr (Policy::template has_facet<error_handler>) {
+            unknown_class_error error;
+            error.context = unknown_class_error::update;
+            error.type = type;
+            Policy::error(error);
+        }
+
+        abort();
+    }
 }
 
 template<class Policy>
@@ -159,6 +182,8 @@ template<class Policy>
 std::size_t fast_perfect_hash<Policy>::hash_min;
 template<class Policy>
 std::size_t fast_perfect_hash<Policy>::hash_max;
+template<class Policy>
+std::vector<type_id> fast_perfect_hash<Policy>::control;
 
 template<class Policy>
 struct checked_perfect_hash : virtual fast_perfect_hash<Policy>,
@@ -170,7 +195,6 @@ struct checked_perfect_hash : virtual fast_perfect_hash<Policy>,
 
         if (index >= fast_perfect_hash<Policy>::hash_length ||
             control[index] != type) {
-            using namespace policies;
 
             if constexpr (Policy::template has_facet<error_handler>) {
                 unknown_class_error error;

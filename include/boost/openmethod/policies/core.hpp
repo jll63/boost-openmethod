@@ -62,6 +62,22 @@ namespace policies {
 
 struct abstract_policy {};
 
+// -----------------------------------------------------------------------------
+// Facets
+
+struct rtti {
+    static auto type_index(type_id type) -> type_id {
+        return type;
+    }
+
+    template<typename Stream>
+    static void type_name(type_id type, Stream& stream) {
+        stream << "type_id(" << type << ")";
+    }
+};
+
+struct deferred_static_rtti : virtual rtti {};
+
 struct error_handler {};
 struct indirect_vptr {};
 struct type_hash {};
@@ -69,12 +85,17 @@ struct vptr {};
 struct external_vptr : virtual vptr {};
 struct error_output {};
 struct trace_output {};
+struct runtime_checks {};
+
+// -----------------------------------------------------------------------------
+// Facet implementations
 
 struct deferred_static_rtti;
 struct debug;
 struct release;
-struct debug_shared;
-struct release_shared;
+
+// -----------------------------------------------------------------------------
+// basic_domain
 
 template<class Name>
 struct basic_domain {
@@ -153,19 +174,6 @@ struct basic_policy : virtual abstract_policy,
 
 template<class Policy, class Facet>
 constexpr bool has_facet = Policy::template has_facet<Facet>;
-
-struct rtti {
-    static auto type_index(type_id type) -> type_id {
-        return type;
-    }
-
-    template<typename Stream>
-    static void type_name(type_id type, Stream& stream) {
-        stream << "type_id(" << type << ")";
-    }
-};
-
-struct deferred_static_rtti : virtual rtti {};
 
 } // namespace policies
 

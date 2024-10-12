@@ -33,7 +33,19 @@ struct vptr_map : virtual external_vptr {
 
     template<class Class>
     static auto dynamic_vptr(const Class& arg) {
-        return vptrs.find(Policy::dynamic_type(arg))->second;
+        auto type = Policy::dynamic_type(arg);
+        auto iter = vptrs.find(type);
+
+        if constexpr (Policy::template has_facet<runtime_checks>) {
+            if (iter == vptrs.end()) {
+                unknown_class_error error;
+                error.context = unknown_class_error::update;
+                error.type = type;
+                Policy::error(error);
+            }
+        }
+
+        return iter->second;
     }
 };
 
