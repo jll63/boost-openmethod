@@ -571,106 +571,35 @@ facets and stock implementations.
 
 | type_hash
 | fast_perfect_hash
-|
+| hash type id to an index in a vector
 
 | error_handler
 | vectored_error_handler
-|
+| call a `std::function` when an error occurs
 
 |===
 
-* `rtti`
+`policies::debug` contains the same facets as `release`, plus a few more:
 
-- `class vptr`: obtain a vptr from a virtual argument
+[cols="1,1,1"]
+|===
+|facet |implementation |role
 
-- `class error_handler`: handle errors
+| runtime_checks
+|
+| enable runtime checks
 
-- `class trace_output`: explain how the dispatch tables are built
+| error_output
+| basic_error_output
+| print error descriptions to `stderr`
 
-A policy needs not contain all the facets. Only the `rtti` facet is required.
-If, for example, a policy does not contain an
+| trace_output
+| basic_trace_output
+| make `initialize` print information about dispatch table construction to  `stderr`
 
+|===
 
-
-Policies consist of a collection of _facets_, which are classes derived from:
-
-Facets `vptr` and `error_handler` are used during method dispatch. Facets
-`error_handler` and `tracing` are used while building the dispatch tables
-(`initalize`).
-
-Implementation of facets can use other facets in the same policy:
-
-- `class rtti`: provide a type id for an object or a class
-
-- `class type_hash`: hash a type id
-
--
-
-
-
- For example,
-the default policy uses the `vptr_vector` implementation of the `vptr` facet. It
-uses a `rtti` facet, which provides a type id information. By default,
-`std_rtti` is used. If a `hash_type` facet is present, it is used to hash the
-type id. By default, `fast_perfect_hash` is used.
-
-
-Class registrations and methods are scoped in a policy. A method can only
-reference classes registered in the same policy. If a class is used as a virtual
-parameter in methods using different policies, it must be registered with each
-of them.
-
-A policy has a collection of _facets_, implemented as classes inherited by the
-policy via inheritance.  Facets control how vptrs are fetched, errors are
-handled, etc. Facets fall into categories, and sometimes sub-categories. A
-policy can have at most one facet per category. Some facet categories may be
-absent from a policy; in which case, the corresponding functionality is not
-available.
-
-OpenMethod supports the following facet categories, and provides at least one
-implementation for each category. They are summed up in the following table.
-
-(facet sub-categories are in italics)
-
-| Facet category                  | Responsibility                    | Stock implementations                                                            |
-| ------------------------------- | --------------------------------- | -------------------------------------------------------------------------------- |
-| [vptr](/OpenMethod/reference/policy-vptr.html)         | fetch vptr for virtual argument   |                                                                                  |
-| *[external_vptr](/OpenMethod/reference/policy-vptr.html)*        | store vptr outside the object     | [vptr_vector](/OpenMethod/reference/policy-vptr_vector.html) (D) (R), [vptr_map](/OpenMethod/reference/policy-vptr_map.html)                                  |
-| [rtti](/OpenMethod/reference/policy-rtti.html)                   | provide type information          | [std_rtti](/OpenMethod/reference/policy-std_rtti.html) (D) (R), [minimal_rtti](/OpenMethod/reference/policy-minimal_rtti.html)                                 |
-| *[deferred_static_rtti](/OpenMethod/reference/policy-rtti.html)* | as `rtti`, but avoid static ctors |                                                                                  |
-| [type_hash](/OpenMethod/reference/policy-type_hash.html)              | map type info to integer index    | [fast_perfect_hash](/OpenMethod/reference/policy-fast_perfect_hash.html) (R), [checked_perfect_hash](/OpenMethod/reference/policy-checked_perfect_hash.html) (D)                |
-| [error_handler](/OpenMethod/reference/policy-error_handler.html)          | report errors                     | [vectored_error](/OpenMethod/reference/policy-vectored_error.html), [throw_error](/OpenMethod/reference/policy-throw_error.html), backward_compatible_error_handler |
-| [error_output](/OpenMethod/reference/policy-error_output.html)           | print diagnostics                 | [basic_error_output](/OpenMethod/reference/policy-basic_error_output.html) (D)                                                  |
-| [trace_output](/OpenMethod/reference/policy-trace_output.html)           | trace                             | [basic_trace_output](/OpenMethod/reference/policy-basic_trace_output.html) (D)                                                  |
-
-(D) denotes facets used in the default policy for debug variants, (R) for release
-variants.
-
-Several facets are [CRTP](https://en.cppreference.com/w/cpp/language/crtp) class
-templates, taking the policy as the first template argument. Some facets contain
-static, global data; parameterizing the facet by the policy ensures that each
-policy gets its own global data. Some facets also need to access other facets in
-the same policy.
-
-The stock policies consist of the following facets:
-
-* **debug**: for error detection and trace. Consists of std_rtti,
-  checked_perfect_hash, vptr_vector, basic_error_output, basic_trace_output and
-  backward_compatible_error_handler.
-
-* **release**: for maximum performance. Consists of fast_perfect_hash,
-  vptr_vector, std_rtti and backward_compatible_error_handler.
-
-* **debug_shared**: consists of vptr_vector, std_rtti, checked_perfect_hash,
-  basic_error_output, basic_trace_output and backward_compatible_error_handler.
-  The member function and variables are declared as external in the headers, and
-  explicitly instantiated in the shared library.
-
-* **release_shared**: same as debug_shared, but checkeds are bypassed.
-
-## Overriding the default policy
-
-`boost::openmethod::default_policy` is an alias to one of these four policies,
+`boost::openmethod::policies::default_` is an alias to one of these four policies,
 depending on the value of preprocessor symbols `NDEBUG` and `OpenMethod_SHARED`. It
 is used as the default value for the Policy template parameter in `use_classes`,
 `method`, `virtual_ptr` (and its associated helper functions). This can be
@@ -695,7 +624,7 @@ default policy in every aspect, except that it uses custom RTTI. In addition, we
 don't need to hash the integer type id, so we remove the `type_hash` facet:
 
 ```c++
-struct custom_policy : default_policy
+struct custom_policy : policies::default_
   ::rebind<custom_policy>
   ::replace<policy::rtti, custom_rtti>
   ::remove<policy::type_hash> {

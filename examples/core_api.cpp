@@ -14,21 +14,17 @@ struct Animal {
     virtual ~Animal() = default;
 };
 
-struct Cat : Animal {
-};
+struct Cat : Animal {};
 
-struct Dog : Animal {
-};
+struct Dog : Animal {};
 
-struct Bulldog : Dog {
-};
+struct Bulldog : Dog {};
 
 using namespace boost::openmethod;
 
 class poke_openmethod;
 
-using poke = method<
-    poke_openmethod(std::ostream&, virtual_<Animal&>), void>;
+using poke = method<poke_openmethod(std::ostream&, virtual_<Animal&>), void>;
 
 auto poke_cat(std::ostream& os, Cat& cat) {
     os << "hiss";
@@ -59,8 +55,8 @@ auto pet_dog(std::ostream& os, Dog& dog) {
     os << "wag tail";
 }
 
-using pet = method<
-    BOOST_OPENMETHOD_NAME(pet)(std::ostream&, virtual_<Animal&>), void>;
+using pet =
+    method<BOOST_OPENMETHOD_NAME(pet)(std::ostream&, virtual_<Animal&>), void>;
 
 BOOST_OPENMETHOD_REGISTER(pet::override<pet_cat, pet_dog>);
 

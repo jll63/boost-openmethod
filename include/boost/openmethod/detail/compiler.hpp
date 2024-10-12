@@ -277,7 +277,7 @@ struct compiler : detail::generic_compiler {
     using indent = typename detail::trace_type<Policy>::indent;
 };
 
-compiler() -> compiler<default_policy>;
+compiler() -> compiler<policies::default_>;
 
 template<class Policy>
 void compiler<Policy>::install_global_tables() {

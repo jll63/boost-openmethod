@@ -21,7 +21,7 @@ using std::cout;
 using namespace boost::openmethod;
 using namespace boost::openmethod::detail;
 
-auto debug_handler = &default_policy::error_handler;
+auto debug_handler = &policies::default_::error_handler;
 
 struct base {
     virtual ~base() {
@@ -43,17 +43,17 @@ static_assert(
 
 static_assert(std::is_same_v<
               spec_polymorphic_types<
-                  default_policy, types<virtual_<a&>, b, virtual_<c&>>,
+                  policies::default_, types<virtual_<a&>, b, virtual_<c&>>,
                   types<d&, e, f&>>,
               types<d, f>>);
 
-static_assert(
-    std::is_same_v<polymorphic_type<default_policy, std::shared_ptr<a>>, a>);
+static_assert(std::is_same_v<
+              polymorphic_type<policies::default_, std::shared_ptr<a>>, a>);
 
 static_assert(
     std::is_same_v<
         spec_polymorphic_types<
-            default_policy,
+            policies::default_,
             types<
                 virtual_<std::shared_ptr<a>>, b, virtual_<std::shared_ptr<c>>>,
             types<std::shared_ptr<d>, e, std::shared_ptr<f>>>,
@@ -110,8 +110,8 @@ BOOST_AUTO_TEST_CASE(test_virtual_ptr_by_ref) {
 }
 
 BOOST_AUTO_TEST_CASE(test_final_error) {
-    auto prev_handler = default_policy::set_error_handler(
-        [](const default_policy::error_variant& ev) {
+    auto prev_handler = policies::default_::set_error_handler(
+        [](const policies::default_::error_variant& ev) {
             if (auto error = std::get_if<method_table_error>(&ev)) {
                 static_assert(
                     std::is_same_v<decltype(error), const method_table_error*>);
@@ -127,16 +127,16 @@ BOOST_AUTO_TEST_CASE(test_final_error) {
         Animal& animal = snoopy;
         virtual_ptr<Animal>::final(animal);
     } catch (const method_table_error& error) {
-        default_policy::set_error_handler(prev_handler);
+        policies::default_::set_error_handler(prev_handler);
         BOOST_TEST(error.type == reinterpret_cast<type_id>(&typeid(Dog)));
         threw = true;
     } catch (...) {
-        default_policy::set_error_handler(prev_handler);
+        policies::default_::set_error_handler(prev_handler);
         BOOST_FAIL("wrong exception");
         return;
     }
 
-    if constexpr (default_policy::has_facet<policies::runtime_checks>) {
+    if constexpr (policies::default_::has_facet<policies::runtime_checks>) {
         if (!threw) {
             BOOST_FAIL("should have thrown");
         }

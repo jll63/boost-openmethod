@@ -42,13 +42,13 @@ struct debug : release::rebind<debug>::add<
 static_assert(std::is_base_of_v<trace_output, debug>);
 static_assert(debug::has_facet<trace_output>);
 
-} // namespace policies
-
 #ifdef NDEBUG
-using default_policy = policies::release;
+using default_ = policies::release;
 #else
-using default_policy = policies::debug;
+using default_ = policies::debug;
 #endif
+
+} // namespace policies
 
 } // namespace openmethod
 } // namespace boost

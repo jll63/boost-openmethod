@@ -12,56 +12,53 @@ struct Animal {
     virtual ~Animal() = default;
 };
 
-struct Cat : Animal {
-};
+struct Cat : Animal {};
 
-struct Dog : Animal {
-};
+struct Dog : Animal {};
 
-BOOST_OPENMETHOD(
-    poke, (std::ostream&, virtual_<Animal&>), void);
+BOOST_OPENMETHOD(poke, (std::ostream&, virtual_<Animal&>), void);
 
-BOOST_OPENMETHOD_OVERRIDE(
-    poke, (std::ostream& os, Cat& cat), void) {
-        os << "hiss";
+BOOST_OPENMETHOD_OVERRIDE(poke, (std::ostream & os, Cat& cat), void) {
+    os << "hiss";
 }
 
-BOOST_OPENMETHOD_OVERRIDE(
-    poke, (std::ostream& os, Dog& dog), void) {
-        os << "bark";
+BOOST_OPENMETHOD_OVERRIDE(poke, (std::ostream & os, Dog& dog), void) {
+    os << "bark";
 }
 
 BOOST_OPENMETHOD_CLASSES(Animal, Cat, Dog);
 
-struct Bulldog : Dog {
-};
+struct Bulldog : Dog {};
 
 BOOST_OPENMETHOD_CLASSES(Dog, Bulldog);
 
-BOOST_OPENMETHOD_OVERRIDE(
-    poke, (std::ostream& os, Bulldog& dog), void) {
-        next(os, dog); // prints "bark"
-        os << " and bite";
+BOOST_OPENMETHOD_OVERRIDE(poke, (std::ostream & os, Bulldog& dog), void) {
+    next(os, dog); // prints "bark"
+    os << " and bite";
 }
 
 BOOST_OPENMETHOD(
     encounter, (std::ostream&, virtual_<Animal&>, virtual_<Animal&>), void);
 
 // 'encounter' catch-all implementation.
-BOOST_OPENMETHOD_OVERRIDE(encounter, (std::ostream& os, Animal&, Animal&), void) {
+BOOST_OPENMETHOD_OVERRIDE(
+    encounter, (std::ostream & os, Animal&, Animal&), void) {
     os << "ignore";
 }
 
 // Add definitions for specific pairs of animals.
-BOOST_OPENMETHOD_OVERRIDE(encounter, (std::ostream& os, Dog& dog1, Dog& dog2), void) {
+BOOST_OPENMETHOD_OVERRIDE(
+    encounter, (std::ostream & os, Dog& dog1, Dog& dog2), void) {
     os << "wag tail";
 }
 
-BOOST_OPENMETHOD_OVERRIDE(encounter, (std::ostream& os, Dog& dog, Cat& cat), void) {
+BOOST_OPENMETHOD_OVERRIDE(
+    encounter, (std::ostream & os, Dog& dog, Cat& cat), void) {
     os << "chase";
 }
 
-BOOST_OPENMETHOD_OVERRIDE(encounter, (std::ostream& os, Cat& cat, Dog& dog), void) {
+BOOST_OPENMETHOD_OVERRIDE(
+    encounter, (std::ostream & os, Cat& cat, Dog& dog), void) {
     os << "run";
 }
 
