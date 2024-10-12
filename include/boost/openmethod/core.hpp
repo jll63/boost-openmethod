@@ -381,7 +381,7 @@ class virtual_ptr {
             typename virtual_traits<Policy, Other&>::polymorphic_type>();
 
         if (dynamic_id == static_id) {
-            if constexpr (has_facet<Policy, indirect_vptr>) {
+            if constexpr (Policy::template has_facet<indirect_vptr>) {
                 vptr = &Policy::template static_vptr<
                     typename virtual_traits<Policy, Other&>::polymorphic_type>;
             } else {
@@ -391,11 +391,11 @@ class virtual_ptr {
         } else {
             auto index = dynamic_id;
 
-            if constexpr (has_facet<Policy, type_hash>) {
+            if constexpr (Policy::template has_facet<type_hash>) {
                 index = Policy::hash_type_id(index);
             }
 
-            if constexpr (has_facet<Policy, indirect_vptr>) {
+            if constexpr (Policy::template has_facet<indirect_vptr>) {
                 vptr = Policy::indirect_vptrs[index];
             } else {
                 vptr = Policy::vptrs[index];
@@ -441,13 +441,13 @@ class virtual_ptr {
 
         vptr_type vptr;
 
-        if constexpr (has_facet<Policy, indirect_vptr>) {
+        if constexpr (Policy::template has_facet<indirect_vptr>) {
             vptr = &Policy::template static_vptr<polymorphic_type>;
         } else {
             vptr = Policy::template static_vptr<polymorphic_type>;
         }
 
-        if constexpr (has_facet<Policy, runtime_checks>) {
+        if constexpr (Policy::template has_facet<runtime_checks>) {
             // check that dynamic type == static type
             auto dynamic_type =
                 Policy::dynamic_type(other_virtual_traits::rarg(obj));

@@ -23,7 +23,7 @@ struct vptr_vector : virtual external_vptr {
 
         std::size_t size;
 
-        if constexpr (has_facet<Policy, type_hash>) {
+        if constexpr (Policy::template has_facet<type_hash>) {
             Policy::hash_initialize(first, last);
             size = Policy::hash_length;
         } else {
@@ -41,7 +41,7 @@ struct vptr_vector : virtual external_vptr {
 
         vptrs.resize(size);
 
-        if constexpr (has_facet<Policy, indirect_vptr>) {
+        if constexpr (Policy::template has_facet<indirect_vptr>) {
             Policy::indirect_vptrs.resize(size);
         }
 
@@ -50,13 +50,13 @@ struct vptr_vector : virtual external_vptr {
                  type_iter != iter->type_id_end(); ++type_iter) {
                 auto index = *type_iter;
 
-                if constexpr (has_facet<Policy, type_hash>) {
+                if constexpr (Policy::template has_facet<type_hash>) {
                     index = Policy::hash_type_id(index);
                 }
 
                 vptrs[index] = iter->vptr();
 
-                if constexpr (has_facet<Policy, indirect_vptr>) {
+                if constexpr (Policy::template has_facet<indirect_vptr>) {
                     Policy::indirect_vptrs[index] = iter->indirect_vptr();
                 }
             }
@@ -67,7 +67,7 @@ struct vptr_vector : virtual external_vptr {
     static auto dynamic_vptr(const Class& arg) -> const std::uintptr_t* {
         auto index = Policy::dynamic_type(arg);
 
-        if constexpr (has_facet<Policy, type_hash>) {
+        if constexpr (Policy::template has_facet<type_hash>) {
             index = Policy::hash_type_id(index);
         }
 

@@ -138,7 +138,7 @@ struct basic_policy : virtual abstract_policy,
     using facets = detail::types<Facets...>;
 
     template<class Facet>
-    static constexpr bool has_facet = std::is_base_of_v<Facet, Policy>;
+    static constexpr bool has_facet = std::is_base_of_v<Facet, basic_policy>;
 
     template<class Facet>
     using use_facet = boost::mp11::mp_first<boost::mp11::mp_filter_q<
@@ -149,6 +149,9 @@ struct basic_policy : virtual abstract_policy,
     template<class NewPolicy>
     using rebind = basic_policy<
         NewPolicy, typename rebind_facet<NewPolicy, Facets>::type...>;
+
+    template<class... MoreFacets>
+    using add = basic_policy<basic_policy, Facets..., MoreFacets...>;
 
     template<class Base, class Facet>
     using replace = boost::mp11::mp_apply<
@@ -171,9 +174,6 @@ struct basic_policy : virtual abstract_policy,
                     boost::mp11::mp_quote_trait<std::is_base_of>, Base>>,
             Policy>>;
 };
-
-template<class Policy, class Facet>
-constexpr bool has_facet = Policy::template has_facet<Facet>;
 
 } // namespace policies
 

@@ -151,7 +151,7 @@ void fast_perfect_hash<Policy>::hash_initialize(
     error.attempts = total_attempts;
     error.buckets = 1 << M;
 
-    if constexpr (has_facet<Policy, error_handler>) {
+    if constexpr (Policy::template has_facet<error_handler>) {
         Policy::error(error);
     }
 
@@ -184,40 +184,6 @@ template<class Policy>
 std::size_t fast_perfect_hash<Policy>::hash_max;
 template<class Policy>
 std::vector<type_id> fast_perfect_hash<Policy>::control;
-
-template<class Policy>
-struct checked_perfect_hash : virtual fast_perfect_hash<Policy>,
-                              virtual runtime_checks {
-    static std::vector<type_id> control;
-
-    static auto hash_type_id(type_id type) -> type_id {
-        auto index = fast_perfect_hash<Policy>::hash_type_id(type);
-
-        if (index >= fast_perfect_hash<Policy>::hash_length ||
-            control[index] != type) {
-
-            if constexpr (Policy::template has_facet<error_handler>) {
-                unknown_class_error error;
-                error.context = unknown_class_error::update;
-                error.type = type;
-                Policy::error(error);
-            }
-
-            abort();
-        }
-
-        return index;
-    }
-
-    template<typename ForwardIterator>
-    static void hash_initialize(ForwardIterator first, ForwardIterator last) {
-        fast_perfect_hash<Policy>::hash_initialize(first, last, control);
-        control.resize(fast_perfect_hash<Policy>::hash_length);
-    }
-};
-
-template<class Policy>
-std::vector<type_id> checked_perfect_hash<Policy>::control;
 
 } // namespace policies
 } // namespace openmethod

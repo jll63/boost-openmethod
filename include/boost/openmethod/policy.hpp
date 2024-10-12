@@ -35,10 +35,12 @@ struct release : basic_policy<
                      release, std_rtti, fast_perfect_hash<release>,
                      vptr_vector<release>, vectored_error_handler<release>> {};
 
-struct debug : basic_policy<
-                   debug, std_rtti, checked_perfect_hash<debug>,
-                   vptr_vector<debug>, basic_error_output<debug>,
-                   basic_trace_output<debug>, vectored_error_handler<debug>> {};
+struct debug : release::rebind<debug>::add<
+                   runtime_checks, basic_error_output<debug>,
+                   basic_trace_output<debug>> {};
+
+static_assert(std::is_base_of_v<trace_output, debug>);
+static_assert(debug::has_facet<trace_output>);
 
 } // namespace policies
 

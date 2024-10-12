@@ -555,7 +555,7 @@ void compiler<Policy>::augment_methods() {
                 unknown_class_error error;
                 error.type = ti;
 
-                if constexpr (has_facet<Policy, error_handler>) {
+                if constexpr (Policy::template has_facet<error_handler>) {
                     Policy::error(error);
                 }
 
@@ -609,7 +609,7 @@ void compiler<Policy>::augment_methods() {
                     unknown_class_error error;
                     error.type = type;
 
-                    if constexpr (has_facet<Policy, error_handler>) {
+                    if constexpr (Policy::template has_facet<error_handler>) {
                         Policy::error(error);
                     }
 
@@ -631,7 +631,7 @@ void compiler<Policy>::augment_methods() {
                     unknown_class_error error;
                     error.type = overrider_info.return_type;
 
-                    if constexpr (has_facet<Policy, error_handler>) {
+                    if constexpr (Policy::template has_facet<error_handler>) {
                         Policy::error(error);
                     }
 
@@ -1184,7 +1184,7 @@ void compiler<Policy>::write_global_data() {
     ++trace << rflush(4, Policy::dispatch_data.size()) << " " << gv_iter
             << " end\n";
 
-    if constexpr (has_facet<Policy, external_vptr>) {
+    if constexpr (Policy::template has_facet<external_vptr>) {
         Policy::publish_vptrs(classes.begin(), classes.end());
     }
 }
