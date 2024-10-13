@@ -593,11 +593,11 @@ BOOST_OPENMETHOD_OVERRIDE(
 <div class="paragraph">
 <p>This executes in one cycle, like native virtual function calls.</p>
 </div>
-<div class="admonitionblock note">
+<div class="admonitionblock warning">
 <table>
 <tr>
 <td class="icon">
-<i class="fa icon-note" title="Note"></i>
+<i class="fa icon-warning" title="Warning"></i>
 </td>
 <td class="content">
 calling <code>initialize</code> invalidates all existing <code>virtual_ptr</code>s.
@@ -614,7 +614,7 @@ calling <code>initialize</code> invalidates all existing <code>virtual_ptr</code
 <div class="sect2">
 <h3 id="_core_api">Core API</h3>
 <div class="paragraph">
-<p>OpenMethod provides a macro-free interface. This is be useful in certain
+<p>OpenMethod provides a macro-free interface. This is useful in certain
 situations, for example when combining open methods and templates.</p>
 </div>
 <div class="paragraph">
@@ -700,7 +700,8 @@ static poke::override&lt;poke_cat&gt; override_poke_cat;</code></pre>
 </table>
 </div>
 <div class="paragraph">
-<p>If we are using C++26, we can use <code>_</code> instead of inventing an identifier. Again, OpenMethod provides a small convenience macro for this:</p>
+<p>In C++26, we can use <code>_</code> instead of inventing an identifier. Otherwise,
+OpenMethod provides a small convenience macro:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -882,9 +883,9 @@ to the original one in all the CRTP classes. <code>add</code> adds three facets,
 which have state.</p>
 </div>
 <div class="paragraph">
-<p><code>boost::openmethod::policies::default_</code> is an alias to the <code>release</code> or <code>debug</code>
-policy, depending on the value of preprocessor symbols <code>NDEBUG</code>. The default
-policy can be overriden by defining the macroprocessor symbol
+<p><code>boost::openmethod::policies::default_</code> is an alias to the <code>release</code> or the
+<code>debug</code> policy, depending on the value of preprocessor symbols <code>NDEBUG</code>. The
+default policy can be overriden by defining the macroprocessor symbol
 <code>BOOST_OPENMETHOD_DEFAULT_POLICY</code> <em>before</em> including
 <code>&lt;boost/openmethod/core.hpp&gt;</code>. The value of the symbol is used as a default
 template parameter for <code>use_classes</code>, <code>method</code>, <code>virtual_ptr</code>, and others. Once
@@ -894,7 +895,71 @@ has no effect. See below for examples.</p>
 </div>
 <div class="sect2">
 <h3 id="_error_handling">Error Handling</h3>
+<div class="paragraph">
+<p>When an error is encountered, the program is terminated by a call to <code>abort</code>. If
+the policy contains an <code>error_handler</code> facet, its <code>error</code> template member
+function is called with an object identifying the error. The <code>release</code> and
+<code>debug</code> policies implement the error facet with <code>vectored_error_handler</code>, which
+wraps the error object in a variant, and calls a <code>std::function</code> which can be
+set by the user. The function can throw an exception to prevent program
+termination. The default value for the function prints a description of the
+error to <code>stderr</code> in the <code>debug</code> policy, and does nothing in the <code>release.</code></p>
+</div>
+<div class="paragraph">
+<p>Error handling can be customized by setting the function:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight nowrap"><code data-lang="c++">BOOST_OPENMETHOD_CLASSES(Animal, Cat, Dog);
 
+BOOST_OPENMETHOD(trick, (std::ostream&amp;, virtual_&lt;Animal&amp;&gt;), void);
+
+BOOST_OPENMETHOD_OVERRIDE(trick, (std::ostream &amp; os, Dog&amp; dog), void) {
+    os &lt;&lt; "spin\n";
+}
+
+int main() {
+    namespace bom = boost::openmethod;
+    bom::initialize();
+
+    bom::policies::default_::set_error_handler([](const auto&amp; error) {
+        std::visit([](auto&amp;&amp; arg) { throw arg; }, error);
+    });
+
+    Cat felix;
+    Dog hector, snoopy;
+    std::vector&lt;Animal*&gt; animals = {&amp;hector, &amp;felix, &amp;snoopy};
+
+    for (auto animal : animals) {
+        try {
+            trick(std::cout, *animal);
+        } catch (bom::not_implemented_error) {
+            std::cerr &lt;&lt; boost::core::demangle(typeid(*animal).name())
+                      &lt;&lt; "s cannot perform tricks\n";
+        }
+    }
+
+    return 0;
+}</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight nowrap"><code data-lang="c++"></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>in two ways: by setting the function, using
+<code>set_error_handler</code>; or replacing the error facet. The library provides a
+<code>throw_error_handler</code> implementation, which throws the error object as an
+exception.</p>
+</div>
+<div class="paragraph">
+<p>Error handling can be customized in two ways: by setting the function, using
+<code>set_error_handler</code>; or replacing the error facet. The library provides a
+<code>throw_error_handler</code> implementation, which throws the error object as an
+exception.</p>
+</div>
 </div>
 <div class="sect2">
 <h3 id="_custom_rtti">Custom RTTI</h3>

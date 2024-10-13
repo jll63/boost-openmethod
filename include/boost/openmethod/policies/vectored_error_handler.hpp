@@ -17,39 +17,36 @@ namespace openmethod {
 namespace policies {
 
 template<class Policy>
-struct vectored_error_handler : virtual error_handler {
-
+class vectored_error_handler : public virtual error_handler {
+  public:
     using error_variant = std::variant<
-        error, resolution_error, unknown_class_error, hash_search_error,
+        error, not_implemented_error, unknown_class_error, hash_search_error,
         method_table_error, static_slot_error, static_stride_error>;
 
     using error_handler_type = std::function<void(const error_variant& error)>;
-    static error_handler_type error_handler;
 
     template<class Error>
     static auto error(const Error& error) {
-        error_handler(error_variant(error));
+        fn(error_variant(error));
     }
 
     static auto set_error_handler(error_handler_type handler) {
-        auto prev = error_handler;
-        error_handler = handler;
+        auto prev = fn;
+        fn = handler;
 
-        return error_handler;
+        return prev;
     }
 
-    static auto default_error_handler(const error_variant& error_v) {
+  private:
+    static error_handler_type fn;
+
+    static auto default_handler(const error_variant& error_v) {
         using namespace detail;
         using namespace policies;
 
         if constexpr (Policy::template has_facet<error_output>) {
-            if (auto error = std::get_if<resolution_error>(&error_v)) {
-                const char* explanation[] = {
-                    "no applicable overrider", "ambiguous call"};
-                Policy::error_stream
-                    << explanation
-                           [error->status - resolution_error::no_definition]
-                    << " for ";
+            if (auto error = std::get_if<not_implemented_error>(&error_v)) {
+                Policy::error_stream << "no applicable overrider for ";
                 Policy::type_name(error->method, Policy::error_stream);
                 Policy::error_stream << "(";
                 auto comma = "";
@@ -82,8 +79,8 @@ struct vectored_error_handler : virtual error_handler {
 
 template<class Policy>
 typename vectored_error_handler<Policy>::error_handler_type
-    vectored_error_handler<Policy>::error_handler =
-        vectored_error_handler<Policy>::default_error_handler;
+    vectored_error_handler<Policy>::fn =
+        vectored_error_handler<Policy>::default_handler;
 
 } // namespace policies
 } // namespace openmethod

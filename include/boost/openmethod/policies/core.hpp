@@ -28,8 +28,7 @@ using method_catalog = detail::static_list<detail::method_info>;
 
 struct error {};
 
-struct resolution_error : error {
-    enum status_type { no_definition = 1, ambiguous } status;
+struct not_implemented_error : error {
     type_id method;
     std::size_t arity;
     static constexpr std::size_t max_types = 16;

@@ -930,8 +930,7 @@ BOOST_NORETURN auto
 method<Name(Parameters...), Return, Policy>::not_implemented_handler(
     detail::remove_virtual<Parameters>... args) -> Return {
     if constexpr (Policy::template has_facet<policies::error_handler>) {
-        resolution_error error;
-        error.status = resolution_error::no_definition;
+        not_implemented_error error;
         error.method = Policy::template static_type<method>();
         error.arity = Arity;
         type_id types[sizeof...(args)];
@@ -940,7 +939,7 @@ method<Name(Parameters...), Return, Policy>::not_implemented_handler(
          (*ti_iter++ = Policy::dynamic_type(
               detail::parameter_traits<Policy, Parameters>::rarg(args))));
         std::copy_n(
-            types, (std::min)(sizeof...(args), resolution_error::max_types),
+            types, (std::min)(sizeof...(args), not_implemented_error::max_types),
             &error.types[0]);
         Policy::error(error);
     }

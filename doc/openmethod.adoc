@@ -414,13 +414,13 @@ Calls to `vocalize` compile to three instructions:
 
 This executes in one cycle, like native virtual function calls.
 
-NOTE: calling `initialize` invalidates all existing `virtual_ptr`{empty}s.
+WARNING: calling `initialize` invalidates all existing `virtual_ptr`{empty}s.
 
 == Advanced Features
 
 === Core API
 
-OpenMethod provides a macro-free interface. This is be useful in certain
+OpenMethod provides a macro-free interface. This is useful in certain
 situations, for example when combining open methods and templates.
 
 Here is a rewrite of the Animals example.
@@ -480,7 +480,8 @@ static poke::override<poke_cat> override_poke_cat;
 
 NOTE: `override` can register more than one overrider.
 
-If we are using C++26, we can use `_` instead of inventing an identifier. Again, OpenMethod provides a small convenience macro for this:
+In C++26, we can use `_` instead of inventing an identifier. Otherwise,
+OpenMethod provides a small convenience macro:
 
 [source,c++]
 ----
@@ -617,9 +618,9 @@ struct debug : release::rebind<debug>::add<
 to the original one in all the CRTP classes. `add` adds three facets, two of
 which have state.
 
-`boost::openmethod::policies::default_` is an alias to the `release` or `debug`
-policy, depending on the value of preprocessor symbols `NDEBUG`. The default
-policy can be overriden by defining the macroprocessor symbol
+`boost::openmethod::policies::default_` is an alias to the `release` or the
+`debug` policy, depending on the value of preprocessor symbols `NDEBUG`. The
+default policy can be overriden by defining the macroprocessor symbol
 `BOOST_OPENMETHOD_DEFAULT_POLICY` _before_ including
 `<boost/openmethod/core.hpp>`. The value of the symbol is used as a default
 template parameter for `use_classes`, `method`, `virtual_ptr`, and others. Once
@@ -627,6 +628,71 @@ the `core` header has been included, changing `BOOST_OPENMETHOD_DEFAULT_POLICY`
 has no effect. See below for examples.
 
 === Error Handling
+
+When an error is encountered, the program is terminated by a call to `abort`. If
+the policy contains an `error_handler` facet, its `error` template member
+function is called with an object identifying the error. The `release` and
+`debug` policies implement the error facet with `vectored_error_handler`, which
+wraps the error object in a variant, and calls a `std::function` which can be
+set by the user. The function can throw an exception to prevent program
+termination. The default value for the function prints a description of the
+error to `stderr` in the `debug` policy, and does nothing in the `release.`
+
+Error handling can be customized by setting the function:
+
+[source,c++]
+----
+BOOST_OPENMETHOD_CLASSES(Animal, Cat, Dog);
+
+BOOST_OPENMETHOD(trick, (std::ostream&, virtual_<Animal&>), void);
+
+BOOST_OPENMETHOD_OVERRIDE(trick, (std::ostream & os, Dog& dog), void) {
+    os << "spin\n";
+}
+
+int main() {
+    namespace bom = boost::openmethod;
+    bom::initialize();
+
+    bom::policies::default_::set_error_handler([](const auto& error) {
+        std::visit([](auto&& arg) { throw arg; }, error);
+    });
+
+    Cat felix;
+    Dog hector, snoopy;
+    std::vector<Animal*> animals = {&hector, &felix, &snoopy};
+
+    for (auto animal : animals) {
+        try {
+            trick(std::cout, *animal);
+        } catch (bom::not_implemented_error) {
+            std::cerr << boost::core::demangle(typeid(*animal).name())
+                      << "s cannot perform tricks\n";
+        }
+    }
+
+    return 0;
+}
+----
+
+[source,c++]
+----
+----
+
+
+in two ways: by setting the function, using
+`set_error_handler`; or replacing the error facet. The library provides a
+`throw_error_handler` implementation, which throws the error object as an
+exception.
+
+
+
+Error handling can be customized in two ways: by setting the function, using
+`set_error_handler`; or replacing the error facet. The library provides a
+`throw_error_handler` implementation, which throws the error object as an
+exception.
+
+
 
 === Custom RTTI
 

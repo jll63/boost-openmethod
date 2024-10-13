@@ -368,7 +368,7 @@ BOOST_OPENMETHOD_OVERRIDE(
 }
 
 void test_handler(const policies::default_::error_variant& error_v) {
-    if (auto error = std::get_if<resolution_error>(&error_v)) {
+    if (auto error = std::get_if<not_implemented_error>(&error_v)) {
         throw *error;
     }
 
