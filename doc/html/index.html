@@ -6,13 +6,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.20">
 <meta name="author" content="Jean-Louis Leroy">
-<title>OpenMethod: an emulation of Open Multi-Methods as proposed by N2216</title>
+<title>OpenMethod: an emulation of N2216</title>
 <link rel="stylesheet" href="./zajo-dark.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 </head>
 <body class="article toc2 toc-left">
 <div id="header">
-<h1>OpenMethod: an emulation of Open Multi-Methods as proposed by N2216</h1>
+<h1>OpenMethod: an emulation of N2216</h1>
 <div class="details">
 <span id="author" class="author">Jean-Louis Leroy</span><br>
 </div>
@@ -132,7 +131,7 @@ functions (on the left side) and open-methods (on the right side):</p>
 <tr>
 <td class="tableblock halign-left valign-top"><div class="content"><div class="listingblock">
 <div class="content">
-<pre class="rouge highlight nowrap"><code data-lang="c++">#include &lt;iostream&gt;
+<pre class="rouge highlight"><code data-lang="c++">#include &lt;iostream&gt;
 
 
 
@@ -182,48 +181,48 @@ int main() {
 </div></div></td>
 <td class="tableblock halign-left valign-top"><div class="content"><div class="listingblock">
 <div class="content">
-<pre class="rouge highlight nowrap"><code data-lang="c++">#include &lt;iostream&gt;
-#include &lt;boost/openmethod.hpp&gt;               <i class="conum" data-value="1"></i><b>(1)</b>
-#include &lt;boost/openmethod/compiler.hpp&gt;      <i class="conum" data-value="2"></i><b>(2)</b>
+<pre class="rouge highlight"><code data-lang="c++">#include &lt;iostream&gt;
+#include &lt;boost/openmethod.hpp&gt;               <b class="conum">(1)</b>
+#include &lt;boost/openmethod/compiler.hpp&gt;      <b class="conum">(2)</b>
 
 struct Animal {
-    virtual ~Animal() = default;              <i class="conum" data-value="3"></i><b>(3)</b>
+    virtual ~Animal() = default;              <b class="conum">(3)</b>
 };
 
 
-struct Cat : Animal {                         <i class="conum" data-value="3"></i><b>(3)</b>
+struct Cat : Animal {                         <b class="conum">(3)</b>
 };
 
 
-struct Dog : Animal {                         <i class="conum" data-value="3"></i><b>(3)</b>
+struct Dog : Animal {                         <b class="conum">(3)</b>
 };
 
 
-BOOST_OPENMETHOD(                             <i class="conum" data-value="4"></i><b>(4)</b>
+BOOST_OPENMETHOD(                             <b class="conum">(4)</b>
     poke, (std::ostream&amp;, virtual_&lt;Animal&amp;&gt;), void);
 
-BOOST_OPENMETHOD_OVERRIDE(                    <i class="conum" data-value="5"></i><b>(5)</b>
+BOOST_OPENMETHOD_OVERRIDE(                    <b class="conum">(5)</b>
     poke, (std::ostream&amp; os, Cat&amp; cat), void) {
         os &lt;&lt; "hiss";
 }
 
-BOOST_OPENMETHOD_OVERRIDE(                    <i class="conum" data-value="5"></i><b>(5)</b>
+BOOST_OPENMETHOD_OVERRIDE(                    <b class="conum">(5)</b>
     poke, (std::ostream&amp; os, Dog&amp; dog), void) {
         os &lt;&lt; "bark";
 }
 
-BOOST_OPENMETHOD_CLASSES(Animal, Cat, Dog);   <i class="conum" data-value="6"></i><b>(6)</b>
+BOOST_OPENMETHOD_CLASSES(Animal, Cat, Dog);   <b class="conum">(6)</b>
 
 int main() {
-    boost::openmethod::initialize();          <i class="conum" data-value="7"></i><b>(7)</b>
+    boost::openmethod::initialize();          <b class="conum">(7)</b>
 
     std::unique_ptr&lt;Animal&gt; a(new Cat);
     std::unique_ptr&lt;Animal&gt; b(new Dog);
 
-    poke(std::cout, a); // prints "hiss"      <i class="conum" data-value="8"></i><b>(8)</b>
+    poke(std::cout, a); // prints "hiss"      <b class="conum">(8)</b>
     std::cout &lt;&lt; "\n";
 
-    poke(std::cout, b); // prints "bark"      <i class="conum" data-value="8"></i><b>(8)</b>
+    poke(std::cout, b); // prints "bark"      <b class="conum">(8)</b>
     std::cout &lt;&lt; "\n";
 
     return 0;
@@ -234,49 +233,41 @@ int main() {
 </tbody>
 </table>
 <div class="colist arabic">
-<table>
-<tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>Include the main OpenMethod header.</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>Include the compiler header, which provides
+<ol>
+<li>
+<p>Include the main OpenMethod header.</p>
+</li>
+<li>
+<p>Include the compiler header, which provides
 <code>boost::openmethod::initialize()</code>. This is typically needed only in the <code>main</code>
-translation unit.</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="3"></i><b>3</b></td>
-<td><code>poke</code> does not appear anywhere in the class definitions.</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="4"></i><b>4</b></td>
-<td><code>poke</code> is declared outside of the classes. It is a free function. The
+translation unit.</p>
+</li>
+<li>
+<p><code>poke</code> does not appear anywhere in the class definitions.</p>
+</li>
+<li>
+<p><code>poke</code> is declared outside of the classes. It is a free function. The
 <code>Animal</code> argument, implicitly passed as <code>this</code> to the virtual function, has
 become an explicit parameter. Its type is decorated with <code>virtual_</code>. It is not
 required to be the first parameter. The virtual function&#8217;s cv-qualifier is now
 applied to the virtual parameter. Note that parameter names are not allowed in
-<code>BOOST_OPENMETHOD</code> - only types.</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="5"></i><b>5</b></td>
-<td>provides overrides for <code>Cat</code> and <code>Dog</code>.</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="6"></i><b>6</b></td>
-<td>Classes need to be registered for the library to recognize the inheritance
-relationships.  This can be done incrementally.</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="7"></i><b>7</b></td>
-<td>builds the dispatch tables.</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="8"></i><b>8</b></td>
-<td><code>poke</code> is called as a free function. The appropriate override is called,
-depending on the dynamic type if the virtual argument.</td>
-</tr>
-</table>
+<code>BOOST_OPENMETHOD</code> - only types.</p>
+</li>
+<li>
+<p>provides overrides for <code>Cat</code> and <code>Dog</code>.</p>
+</li>
+<li>
+<p>Classes need to be registered for the library to recognize the inheritance
+relationships.  This can be done incrementally.</p>
+</li>
+<li>
+<p>builds the dispatch tables.</p>
+</li>
+<li>
+<p><code>poke</code> is called as a free function. The appropriate override is called,
+depending on the dynamic type if the virtual argument.</p>
+</li>
+</ol>
 </div>
 </div>
 <div class="sect2">
@@ -290,7 +281,7 @@ not exist.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight nowrap"><code data-lang="c++">struct Bulldog : Dog {
+<pre class="rouge highlight"><code data-lang="c++">struct Bulldog : Dog {
 };
 
 BOOST_OPENMETHOD_CLASSES(Dog, Bulldog);
@@ -310,7 +301,7 @@ BOOST_OPENMETHOD_OVERRIDE(
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight nowrap"><code data-lang="c++">BOOST_OPENMETHOD(
+<pre class="rouge highlight"><code data-lang="c++">BOOST_OPENMETHOD(
     encounter, (std::ostream&amp;, virtual_&lt;Animal&amp;&gt;, virtual_&lt;Animal&amp;&gt;), void);
 
 // 'encounter' catch-all implementation.
@@ -370,7 +361,7 @@ the x64 architecture (variable names have been shortened for readability):</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight nowrap"><code data-lang="asm">	mov	    rax, qword ptr [rsi]
+<pre class="rouge highlight"><code data-lang="asm">	mov	    rax, qword ptr [rsi]
 	mov	    rdx, qword ptr [rip + hash_mult]
 	imul	rdx, qword ptr [rax - 8]
 	movzx	ecx, byte ptr [rip + hash_shift]
@@ -449,7 +440,7 @@ example:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight nowrap"><code data-lang="c++">BOOST_OPENMETHOD(vocalize, (std::ostream&amp;, virtual_ptr&lt;Animal&gt;), void);
+<pre class="rouge highlight"><code data-lang="c++">BOOST_OPENMETHOD(vocalize, (std::ostream&amp;, virtual_ptr&lt;Animal&gt;), void);
 
 BOOST_OPENMETHOD_OVERRIDE(
     vocalize, (std::ostream &amp; os, virtual_ptr&lt;Cat&gt; cat), void) {
@@ -484,7 +475,7 @@ BOOST_OPENMETHOD_OVERRIDE(
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight nowrap"><code data-lang="asm">	mov	rax, qword ptr [rip + slots_strides]
+<pre class="rouge highlight"><code data-lang="asm">	mov	rax, qword ptr [rip + slots_strides]
 	mov	rax, qword ptr [rdx + 8*rax]
 	jmp	rax</code></pre>
 </div>
@@ -496,7 +487,7 @@ BOOST_OPENMETHOD_OVERRIDE(
 <table>
 <tr>
 <td class="icon">
-<i class="fa icon-warning" title="Warning"></i>
+<div class="title">Warning</div>
 </td>
 <td class="content">
 calling <code>initialize</code> invalidates all existing <code>virtual_ptr</code>s.
@@ -521,7 +512,7 @@ situations, for example when combining open methods and templates.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight nowrap"><code data-lang="c++">#include &lt;boost/openmethod/core.hpp&gt;
+<pre class="rouge highlight"><code data-lang="c++">#include &lt;boost/openmethod/core.hpp&gt;
 
 using namespace boost::openmethod;
 
@@ -543,7 +534,7 @@ name can get tedious, so OpenMethod provides a macro for that:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight nowrap"><code data-lang="c++">#include &lt;boost/openmethod/macros/name.hpp&gt;
+<pre class="rouge highlight"><code data-lang="c++">#include &lt;boost/openmethod/macros/name.hpp&gt;
 
 class BOOST_OPENMETHOD_NAME(pet);
 
@@ -555,7 +546,7 @@ using pet = method&lt;
 <table>
 <tr>
 <td class="icon">
-<i class="fa icon-note" title="Note"></i>
+<div class="title">Note</div>
 </td>
 <td class="content">
 BOOST_OPENMETHOD and associated macros use <code>BOOST_OPENMETHOD_NAME</code> in
@@ -570,7 +561,7 @@ styles.
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight nowrap"><code data-lang="c++">poke::fn(std::cout, animal);</code></pre>
+<pre class="rouge highlight"><code data-lang="c++">poke::fn(std::cout, animal);</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -579,7 +570,7 @@ styles.
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight nowrap"><code data-lang="c++">auto poke_cat(std::ostream&amp; os, Cat&amp; cat, void) {
+<pre class="rouge highlight"><code data-lang="c++">auto poke_cat(std::ostream&amp; os, Cat&amp; cat, void) {
     os &lt;&lt; "hiss";
 }
 
@@ -590,7 +581,7 @@ static poke::override&lt;poke_cat&gt; override_poke_cat;</code></pre>
 <table>
 <tr>
 <td class="icon">
-<i class="fa icon-note" title="Note"></i>
+<div class="title">Note</div>
 </td>
 <td class="content">
 <code>override</code> can register more than one overrider.
@@ -604,7 +595,7 @@ OpenMethod provides a small convenience macro:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight nowrap"><code data-lang="c++">#include &lt;boost/openmethod/macros/register.hpp&gt;
+<pre class="rouge highlight"><code data-lang="c++">#include &lt;boost/openmethod/macros/register.hpp&gt;
 
 auto poke_dog(std::ostream&amp; os, Dog&amp; dog, void) {
     os &lt;&lt; "bark";
@@ -618,7 +609,7 @@ BOOST_OPENMETHOD_REGISTER(poke::override&lt;poke_dog&gt;);</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight nowrap"><code data-lang="c++">auto poke_bulldog(std::ostream&amp; os, Bulldog&amp; dog, void) -&gt; void {
+<pre class="rouge highlight"><code data-lang="c++">auto poke_bulldog(std::ostream&amp; os, Bulldog&amp; dog, void) -&gt; void {
     poke::next&lt;poke_bulldog&gt;(os, dog);
     os &lt;&lt; " and bite";
 }
@@ -630,7 +621,7 @@ BOOST_OPENMETHOD_REGISTER(poke::override&lt;poke_bulldog&gt;);</code></pre>
 <table>
 <tr>
 <td class="icon">
-<i class="fa icon-note" title="Note"></i>
+<div class="title">Note</div>
 </td>
 <td class="content">
 Since the function uses itself as a template argument in its body, its
@@ -648,12 +639,12 @@ loading.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight nowrap"><code data-lang="c++">BOOST_OPENMETHOD_CLASSES(Animal, Cat, Dog, Bulldog);</code></pre>
+<pre class="rouge highlight"><code data-lang="c++">BOOST_OPENMETHOD_CLASSES(Animal, Cat, Dog, Bulldog);</code></pre>
 </div>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight nowrap"><code data-lang="c++">int main() {
+<pre class="rouge highlight"><code data-lang="c++">int main() {
     boost::openmethod::initialize();
 
     Animal&amp;&amp; a = Cat();
@@ -771,7 +762,7 @@ is a tweak of <code>policies::release</code>:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight nowrap"><code data-lang="c++">struct debug : release::rebind&lt;debug&gt;::add&lt;
+<pre class="rouge highlight"><code data-lang="c++">struct debug : release::rebind&lt;debug&gt;::add&lt;
                    runtime_checks, basic_error_output&lt;debug&gt;,
                    basic_trace_output&lt;debug&gt;&gt; {};</code></pre>
 </div>
@@ -809,7 +800,7 @@ error to <code>stderr</code> in the <code>debug</code> policy, and does nothing 
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight nowrap"><code data-lang="c++">BOOST_OPENMETHOD_CLASSES(Animal, Cat, Dog);
+<pre class="rouge highlight"><code data-lang="c++">BOOST_OPENMETHOD_CLASSES(Animal, Cat, Dog);
 
 BOOST_OPENMETHOD(trick, (std::ostream&amp;, virtual_&lt;Animal&amp;&gt;), void);
 
@@ -844,7 +835,7 @@ int main() {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight nowrap"><code data-lang="console">spin
+<pre class="rouge highlight"><code data-lang="console">spin
 Cats don't perform tricks
 spin</code></pre>
 </div>
@@ -855,7 +846,7 @@ facet implementaion.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight nowrap"><code data-lang="c++">namespace bom = boost::openmethod;
+<pre class="rouge highlight"><code data-lang="c++">namespace bom = boost::openmethod;
 
 struct throwing_policy
     : bom::policies::default_::rebind&lt;throwing_policy&gt;::replace&lt;
@@ -899,7 +890,7 @@ source:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight nowrap"><code data-lang="c++">struct std_rtti : rtti {
+<pre class="rouge highlight"><code data-lang="c++">struct std_rtti : rtti {
     template&lt;typename T&gt;
     static type_id static_type() {
         return reinterpret_cast&lt;type_id&gt;(&amp;typeid(T));
@@ -965,7 +956,7 @@ open-methods.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight nowrap"><code data-lang="c++">struct Animal {
+<pre class="rouge highlight"><code data-lang="c++">struct Animal {
     Animal(unsigned type) : type(type) {
     }
 
@@ -1000,7 +991,7 @@ define the custom RTTI facet. We must <em>not</em> include
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight nowrap"><code data-lang="c++">#include &lt;boost/openmethod/policies/core.hpp&gt;
+<pre class="rouge highlight"><code data-lang="c++">#include &lt;boost/openmethod/policies/core.hpp&gt;
 #include &lt;boost/openmethod/policies/vptr_vector.hpp&gt;
 
 namespace bom = boost::openmethod;
@@ -1036,7 +1027,7 @@ so we will not keep the related facets. It does not support virtual inheritance.
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight nowrap"><code data-lang="c++">struct custom_policy
+<pre class="rouge highlight"><code data-lang="c++">struct custom_policy
     : bom::policies::basic_policy&lt;
           custom_policy, custom_rtti,
           bom::policies::vptr_vector&lt;custom_policy&gt;&gt; {};
@@ -1049,7 +1040,7 @@ so we will not keep the related facets. It does not support virtual inheritance.
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight nowrap"><code data-lang="c++">#include &lt;boost/openmethod.hpp&gt;
+<pre class="rouge highlight"><code data-lang="c++">#include &lt;boost/openmethod.hpp&gt;
 #include &lt;boost/openmethod/compiler.hpp&gt;
 
 BOOST_OPENMETHOD(poke, (std::ostream&amp;, virtual_&lt;Animal&amp;&gt;), void);
@@ -1101,7 +1092,7 @@ reading the type information until <code>initialize</code> is called.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight nowrap"><code data-lang="c++">struct custom_type_info {
+<pre class="rouge highlight"><code data-lang="c++">struct custom_type_info {
     static unsigned last;
     unsigned id = ++last;
 };
@@ -1160,7 +1151,7 @@ custom_type_info Cat::type_info;
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight nowrap"><code data-lang="c++">struct custom_rtti : bom::policies::rtti {
+<pre class="rouge highlight"><code data-lang="c++">struct custom_rtti : bom::policies::rtti {
     // as before
 
     template&lt;typename Derived, typename Base&gt;
@@ -1180,7 +1171,7 @@ custom_type_info Cat::type_info;
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight nowrap"><code data-lang="c++">struct custom_policy
+<pre class="rouge highlight"><code data-lang="c++">struct custom_policy
     : bom::policies::basic_policy&lt;
           custom_policy, custom_rtti,
           bom::policies::deferred_static_rtti, // &lt;-- additional facet
@@ -1265,6 +1256,7 @@ custom_type_info Cat::type_info;
 </div>
 <div id="footer">
 <div id="footer-text">
+Last updated 2024-10-13 15:13:55 -0400
 </div>
 </div>
 </body>

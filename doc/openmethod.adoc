@@ -1,11 +1,5 @@
-:last-update-label!:
-:icons: font
-:prewrap!:
-:docinfo: shared
-:stylesheet: zajo-dark.css
-:source-highlighter: rouge
 
-# OpenMethod: an emulation of Open Multi-Methods as proposed by N2216
+# OpenMethod: an emulation of N2216
 Jean-Louis Leroy
 :toc: left
 :toclevels: 3
@@ -17,6 +11,7 @@ Jean-Louis Leroy
 :source-language: c++
 
 :leveloffset: +1
+
 include::overview.adoc[]
 include::tutorial.adoc[]
 include::reference.adoc[]
