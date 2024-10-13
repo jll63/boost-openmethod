@@ -13,16 +13,25 @@ ifndef::backend-pdf[]
 endif::[]
 Emulation of Open Multi-Methods as proposed by N2216 | Jean-Louis Leroy
 ifndef::backend-pdf[]
+
 :toc: left
 :toclevels: 3
-:toc-title:
+:idprefix:
+:listing-caption: Code Example
+:table-caption: Illustration
+:docinfo: private-footer
+:source-highlighter: rouge
+:source-language: c++
+
+:leveloffset: +1
 
 [.text-right]
 https://github.com/boostorg/OpenMethod[GitHub] | https://boostorg.github.io/OpenMethod/OpenMethod.pdf[PDF]
 endif::[]
 
 [abstract]
-== Abstract
+
+= Abstract
 
 Boost OpenMethod implements Open Multi-Methods.
 Features:
@@ -49,12 +58,12 @@ ifndef::backend-pdf[]
 endif::[]
 
 [[support]]
-== Support
+= Support
 
 * https://github.com/boostorg/OpenMethod/issues[Report issues] on GitHub
 
 [[distribution]]
-== Distribution
+= Distribution
 
 
 OpenMethod is distributed under the http://www.boost.org/LICENSE_1_0.txt[Boost Software License, Version 1.0].
@@ -64,7 +73,7 @@ There are three distribution channels:
 * OpenMethod is included in official https://www.boost.org/[Boost] releases (starting with Boost 1.75), and therefore available via most package managers.
 * The source code is hosted on https://github.com/boostorg/OpenMethod[GitHub].
 
-== Motivation
+= Motivation
 
 Open-methods are similar to virtual functions, but they are not required to be
 members of a class. By being simultaneously free _and_ virtual, they provide a
@@ -91,10 +100,9 @@ standard.
 
 [[tutorial]]
 
-== Tutorial
+= Tutorial
 
-
-=== Hello World
+== Hello World
 
 Here is a side-by-side implementation of the same program, using virtual
 functions (on the left side) and open-methods (on the right side):
@@ -233,7 +241,7 @@ relationships.  This can be done incrementally.
 <8> `poke` is called as a free function. The appropriate override is called,
 depending on the dynamic type if the virtual argument.
 
-=== Next
+== Next
 
 If a virtual function overrides a non-pure virtual function, it typically calls
 the calls the latter as part of its implementation. The equivalent for
@@ -255,7 +263,7 @@ BOOST_OPENMETHOD_OVERRIDE(
 }
 ----
 
-=== Multiple Dispatch
+== Multiple Dispatch
 
 Open-methods can have more than one virtual parameter.
 
@@ -289,16 +297,16 @@ the others, the return type is used as a tie-breaker, _if_ it is covariant with
 the return type of the base method. If there is still no unique overrider, one
 of the overriders is chosen arbitrarily.
 
-=== Multiple Inheritance
+== Multiple Inheritance
 
 Multiple inheritance is supported, with the exception of repeated inheritance.
 
 Virtual inheritance is supported, but it incurs calls to `dynamic_cast` to cast
 the method's arguments to the types required by the overrider.
 
-=== Friendship
+== Friendship
 
-=== Performance
+== Performance
 
 Open methods are almost as fast as ordinary virtual member functions when
 compiled with optimization. For both clang and gcc, dispatching a call to a
@@ -357,7 +365,7 @@ Micro benchmarks suggest that the overhead of dispatching an open-methods with a
 single virtual argument is between 30% and 50% slower than calling the
 equivalent virtual function, if the body is empty.
 
-=== `virtual_ptr`
+== `virtual_ptr`
 
 The seven first instructions in the assembly code above look up the v-table for
 the object. The result will always be the same for the same object. Therefore,
@@ -416,9 +424,9 @@ This executes in one cycle, like native virtual function calls.
 
 WARNING: calling `initialize` invalidates all existing `virtual_ptr`{empty}s.
 
-== Advanced Features
+= Advanced Features
 
-=== Core API
+== Core API
 
 OpenMethod provides a macro-free interface. This is useful in certain
 situations, for example when combining open methods and templates.
@@ -539,7 +547,7 @@ int main() {
 }
 ----
 
-=== Policies and Facets
+== Policies and Facets
 
 Methods and classes are scoped in a policy. A method can only reference classes
 registered in the same policy. If a class is used as a virtual parameter in
@@ -627,7 +635,7 @@ template parameter for `use_classes`, `method`, `virtual_ptr`, and others. Once
 the `core` header has been included, changing `BOOST_OPENMETHOD_DEFAULT_POLICY`
 has no effect. See below for examples.
 
-=== Error Handling
+== Error Handling
 
 When an error is encountered, the program is terminated by a call to `abort`. If
 the policy contains an `error_handler` facet, its `error` template member
@@ -722,7 +730,7 @@ int main() {
 }
 ----
 
-=== Custom RTTI
+== Custom RTTI
 
 Stock policies use the `std_rtti` implementation of `rtti`. Here is its full
 source:
@@ -897,7 +905,7 @@ int main() {
 
 This programs compiles even if standard RTTI is disabled.
 
-=== Deferred RTTI
+== Deferred RTTI
 
 The RTTI system assigns the types id statically. It is more common to allocate
 them using a global counter, manipulated by static constructors. This is a
@@ -996,36 +1004,38 @@ struct custom_policy
           bom::policies::vptr_vector<custom_policy>> {};
 ----
 
-== Reference
+= Reference
 
-=== Headers
+== Headers
 
-=== Namespaces
+== Namespaces
 
-=== Macros
+== Macros
 
-==== BOOST_OPENMETHOD
+=== BOOST_OPENMETHOD
 
-==== BOOST_OPENMETHOD_OVERRIDE
+=== BOOST_OPENMETHOD_OVERRIDE
 
-==== BOOST_OPENMETHOD_OVERRIDE_INLINE
+=== BOOST_OPENMETHOD_OVERRIDE_INLINE
 
-==== BOOST_OPENMETHOD_REGISTER
+=== BOOST_OPENMETHOD_REGISTER
 
-==== BOOST_OPENMETHOD_NAME
+=== BOOST_OPENMETHOD_NAME
 
-==== BOOST_OPENMETHOD_CLASSES
+=== BOOST_OPENMETHOD_CLASSES
 
-==== BOOST_OPENMETHOD_DEFAULT_POLICY
+=== BOOST_OPENMETHOD_DEFAULT_POLICY
 
-=== Core API
+== Core API
 
-==== method
+=== method
 
-==== virtual_
+=== virtual_
 
-==== virtual_ptr
+=== virtual_ptr
 
-==== basic_policy
+=== basic_policy
+
+=== Facets
 
 ==== rtti

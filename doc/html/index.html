@@ -22,66 +22,11 @@ function switch_style()
 }
 </script>
 </head>
-<body class="article toc2 toc-left">
+<body class="article">
 <div id="header">
 <h1>OpenMethod<div style="z-index: 3; bottom:-16px; right:4px; position:fixed"><input width="32" height="32" type="image" alt="Skin" src="./skin.png" onclick="this.blur();switch_style();return false;"/></div></h1>
 <div class="details">
 <span id="author" class="author">Emulation of Open Multi-Methods as proposed by N2216 | Jean-Louis Leroy</span><br>
-</div>
-<div id="toc" class="toc2">
-<div id="toctitle"></div>
-<ul class="sectlevel1">
-<li><a href="#_abstract">Abstract</a></li>
-<li><a href="#support">Support</a></li>
-<li><a href="#distribution">Distribution</a></li>
-<li><a href="#_motivation">Motivation</a></li>
-<li><a href="#tutorial">Tutorial</a>
-<ul class="sectlevel2">
-<li><a href="#_hello_world">Hello World</a></li>
-<li><a href="#_next">Next</a></li>
-<li><a href="#_multiple_dispatch">Multiple Dispatch</a></li>
-<li><a href="#_multiple_inheritance">Multiple Inheritance</a></li>
-<li><a href="#_friendship">Friendship</a></li>
-<li><a href="#_performance">Performance</a></li>
-<li><a href="#_virtual_ptr"><code>virtual_ptr</code></a></li>
-</ul>
-</li>
-<li><a href="#_advanced_features">Advanced Features</a>
-<ul class="sectlevel2">
-<li><a href="#_core_api">Core API</a></li>
-<li><a href="#_policies_and_facets">Policies and Facets</a></li>
-<li><a href="#_error_handling">Error Handling</a></li>
-<li><a href="#_custom_rtti">Custom RTTI</a></li>
-<li><a href="#_deferred_rtti">Deferred RTTI</a></li>
-</ul>
-</li>
-<li><a href="#_reference">Reference</a>
-<ul class="sectlevel2">
-<li><a href="#_headers">Headers</a></li>
-<li><a href="#_namespaces">Namespaces</a></li>
-<li><a href="#_macros">Macros</a>
-<ul class="sectlevel3">
-<li><a href="#_boost_openmethod">BOOST_OPENMETHOD</a></li>
-<li><a href="#_boost_openmethod_override">BOOST_OPENMETHOD_OVERRIDE</a></li>
-<li><a href="#_boost_openmethod_override_inline">BOOST_OPENMETHOD_OVERRIDE_INLINE</a></li>
-<li><a href="#_boost_openmethod_register">BOOST_OPENMETHOD_REGISTER</a></li>
-<li><a href="#_boost_openmethod_name">BOOST_OPENMETHOD_NAME</a></li>
-<li><a href="#_boost_openmethod_classes">BOOST_OPENMETHOD_CLASSES</a></li>
-<li><a href="#_boost_openmethod_default_policy">BOOST_OPENMETHOD_DEFAULT_POLICY</a></li>
-<li><a href="#_virtual">virtual_</a></li>
-<li><a href="#_virtual_ptr_2">virtual_ptr</a></li>
-</ul>
-</li>
-<li><a href="#_core_api_2">Core API</a>
-<ul class="sectlevel3">
-<li><a href="#_method">method</a></li>
-<li><a href="#_policies">Policies</a></li>
-<li><a href="#_facets">Facets</a></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
 </div>
 </div>
 <div id="content">
@@ -93,7 +38,7 @@ function switch_style()
 </div>
 </div>
 <div class="sect1">
-<h2 id="_abstract">Abstract</h2>
+<h2 id="abstract">Abstract</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>Boost OpenMethod implements Open Multi-Methods.
@@ -173,7 +118,7 @@ Features:</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_motivation">Motivation</h2>
+<h2 id="motivation">Motivation</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>Open-methods are similar to virtual functions, but they are not required to be
@@ -213,7 +158,7 @@ standard.</p>
 <h2 id="tutorial">Tutorial</h2>
 <div class="sectionbody">
 <div class="sect2">
-<h3 id="_hello_world">Hello World</h3>
+<h3 id="hello_world">Hello World</h3>
 <div class="paragraph">
 <p>Here is a side-by-side implementation of the same program, using virtual
 functions (on the left side) and open-methods (on the right side):</p>
@@ -381,7 +326,7 @@ depending on the dynamic type if the virtual argument.</td>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_next">Next</h3>
+<h3 id="next">Next</h3>
 <div class="paragraph">
 <p>If a virtual function overrides a non-pure virtual function, it typically calls
 the calls the latter as part of its implementation. The equivalent for
@@ -405,7 +350,7 @@ BOOST_OPENMETHOD_OVERRIDE(
 </div>
 </div>
 <div class="sect2">
-<h3 id="_multiple_dispatch">Multiple Dispatch</h3>
+<h3 id="multiple_dispatch">Multiple Dispatch</h3>
 <div class="paragraph">
 <p>Open-methods can have more than one virtual parameter.</p>
 </div>
@@ -442,7 +387,7 @@ of the overriders is chosen arbitrarily.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_multiple_inheritance">Multiple Inheritance</h3>
+<h3 id="multiple_inheritance">Multiple Inheritance</h3>
 <div class="paragraph">
 <p>Multiple inheritance is supported, with the exception of repeated inheritance.</p>
 </div>
@@ -452,11 +397,11 @@ the method&#8217;s arguments to the types required by the overrider.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_friendship">Friendship</h3>
+<h3 id="friendship">Friendship</h3>
 
 </div>
 <div class="sect2">
-<h3 id="_performance">Performance</h3>
+<h3 id="performance">Performance</h3>
 <div class="paragraph">
 <p>Open methods are almost as fast as ordinary virtual member functions when
 compiled with optimization. For both clang and gcc, dispatching a call to a
@@ -532,7 +477,7 @@ equivalent virtual function, if the body is empty.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_virtual_ptr"><code>virtual_ptr</code></h3>
+<h3 id="virtual_ptr"><code>virtual_ptr</code></h3>
 <div class="paragraph">
 <p>The seven first instructions in the assembly code above look up the v-table for
 the object. The result will always be the same for the same object. Therefore,
@@ -609,10 +554,10 @@ calling <code>initialize</code> invalidates all existing <code>virtual_ptr</code
 </div>
 </div>
 <div class="sect1">
-<h2 id="_advanced_features">Advanced Features</h2>
+<h2 id="advanced_features">Advanced Features</h2>
 <div class="sectionbody">
 <div class="sect2">
-<h3 id="_core_api">Core API</h3>
+<h3 id="core_api">Core API</h3>
 <div class="paragraph">
 <p>OpenMethod provides a macro-free interface. This is useful in certain
 situations, for example when combining open methods and templates.</p>
@@ -769,7 +714,7 @@ loading.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_policies_and_facets">Policies and Facets</h3>
+<h3 id="policies_and_facets">Policies and Facets</h3>
 <div class="paragraph">
 <p>Methods and classes are scoped in a policy. A method can only reference classes
 registered in the same policy. If a class is used as a virtual parameter in
@@ -894,7 +839,7 @@ has no effect. See below for examples.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_error_handling">Error Handling</h3>
+<h3 id="error_handling">Error Handling</h3>
 <div class="paragraph">
 <p>When an error is encountered, the program is terminated by a call to <code>abort</code>. If
 the policy contains an <code>error_handler</code> facet, its <code>error</code> template member
@@ -993,7 +938,7 @@ int main() {
 </div>
 </div>
 <div class="sect2">
-<h3 id="_custom_rtti">Custom RTTI</h3>
+<h3 id="custom_rtti">Custom RTTI</h3>
 <div class="paragraph">
 <p>Stock policies use the <code>std_rtti</code> implementation of <code>rtti</code>. Here is its full
 source:</p>
@@ -1186,7 +1131,7 @@ int main() {
 </div>
 </div>
 <div class="sect2">
-<h3 id="_deferred_rtti">Deferred RTTI</h3>
+<h3 id="deferred_rtti">Deferred RTTI</h3>
 <div class="paragraph">
 <p>The RTTI system assigns the types id statically. It is more common to allocate
 them using a global counter, manipulated by static constructors. This is a
@@ -1292,159 +1237,70 @@ custom_type_info Cat::type_info;
 </div>
 </div>
 <div class="sect1">
-<h2 id="_reference">Reference</h2>
+<h2 id="reference">Reference</h2>
 <div class="sectionbody">
 <div class="sect2">
-<h3 id="_headers">Headers</h3>
+<h3 id="headers">Headers</h3>
 
 </div>
 <div class="sect2">
-<h3 id="_namespaces">Namespaces</h3>
+<h3 id="namespaces">Namespaces</h3>
 
 </div>
 <div class="sect2">
-<h3 id="_macros">Macros</h3>
+<h3 id="macros">Macros</h3>
 <div class="sect3">
-<h4 id="_boost_openmethod">BOOST_OPENMETHOD</h4>
+<h4 id="boost_openmethod">BOOST_OPENMETHOD</h4>
 
 </div>
 <div class="sect3">
-<h4 id="_boost_openmethod_override">BOOST_OPENMETHOD_OVERRIDE</h4>
+<h4 id="boost_openmethod_override">BOOST_OPENMETHOD_OVERRIDE</h4>
 
 </div>
 <div class="sect3">
-<h4 id="_boost_openmethod_override_inline">BOOST_OPENMETHOD_OVERRIDE_INLINE</h4>
+<h4 id="boost_openmethod_override_inline">BOOST_OPENMETHOD_OVERRIDE_INLINE</h4>
 
 </div>
 <div class="sect3">
-<h4 id="_boost_openmethod_register">BOOST_OPENMETHOD_REGISTER</h4>
+<h4 id="boost_openmethod_register">BOOST_OPENMETHOD_REGISTER</h4>
 
 </div>
 <div class="sect3">
-<h4 id="_boost_openmethod_name">BOOST_OPENMETHOD_NAME</h4>
+<h4 id="boost_openmethod_name">BOOST_OPENMETHOD_NAME</h4>
 
 </div>
 <div class="sect3">
-<h4 id="_boost_openmethod_classes">BOOST_OPENMETHOD_CLASSES</h4>
+<h4 id="boost_openmethod_classes">BOOST_OPENMETHOD_CLASSES</h4>
 
 </div>
 <div class="sect3">
-<h4 id="_boost_openmethod_default_policy">BOOST_OPENMETHOD_DEFAULT_POLICY</h4>
-
-</div>
-<div class="sect3">
-<h4 id="_virtual">virtual_</h4>
-
-</div>
-<div class="sect3">
-<h4 id="_virtual_ptr_2">virtual_ptr</h4>
+<h4 id="boost_openmethod_default_policy">BOOST_OPENMETHOD_DEFAULT_POLICY</h4>
 
 </div>
 </div>
 <div class="sect2">
-<h3 id="_core_api_2">Core API</h3>
+<h3 id="core_api_2">Core API</h3>
 <div class="sect3">
-<h4 id="_method">method</h4>
+<h4 id="method">method</h4>
 
 </div>
 <div class="sect3">
-<h4 id="_policies">Policies</h4>
-<div class="sect4">
-<h5 id="_basic_policy">basic_policy</h5>
+<h4 id="virtual">virtual_</h4>
 
-</div>
 </div>
 <div class="sect3">
-<h4 id="_facets">Facets</h4>
-<div class="sect4">
-<h5 id="_rtti">rtti</h5>
+<h4 id="virtual_ptr_2">virtual_ptr</h4>
 
 </div>
+<div class="sect3">
+<h4 id="basic_policy">basic_policy</h4>
+
+</div>
+<div class="sect3">
+<h4 id="facets">Facets</h4>
 <div class="sect4">
-<h5 id="_policiesbasic_policy">policies::basic_policy</h5>
-<div class="literalblock">
-<div class="content">
-<pre class="nowrap">Facets are similar to C++20 concepts: they indicate that certain
-functionalities are available in the policy, but most do not provide them; that
-is the role of a _facet implementation_, which is similar to a model of a
-concept in C++20.</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>OpenMethod provides the following facets and facet implementations.</p>
-</div>
-<table class="tableblock frame-all grid-all stretch">
-<colgroup>
-<col style="width: 33.3333%;">
-<col style="width: 33.3333%;">
-<col style="width: 33.3334%;">
-</colgroup>
-<thead>
-<tr>
-<th class="tableblock halign-left valign-top">Facet</th>
-<th class="tableblock halign-left valign-top">Responsibility</th>
-<th class="tableblock halign-left valign-top">Implementation</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
-<p>vptr_placement</p>
-</div></div></td>
-<td class="tableblock halign-left valign-top"><div class="content"></div></td>
-<td class="tableblock halign-left valign-top"><div class="content"></div></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
-<p>external_vptr</p>
-</div></div></td>
-<td class="tableblock halign-left valign-top"><div class="content"></div></td>
-<td class="tableblock halign-left valign-top"><div class="content"></div></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
-<p>rtti</p>
-</div></div></td>
-<td class="tableblock halign-left valign-top"><div class="content"></div></td>
-<td class="tableblock halign-left valign-top"><div class="content"></div></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
-<p>deferred_static_rtti</p>
-</div></div></td>
-<td class="tableblock halign-left valign-top"><div class="content"></div></td>
-<td class="tableblock halign-left valign-top"><div class="content"></div></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
-<p>type_hash</p>
-</div></div></td>
-<td class="tableblock halign-left valign-top"><div class="content"></div></td>
-<td class="tableblock halign-left valign-top"><div class="content"></div></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
-<p>error_handler</p>
-</div></div></td>
-<td class="tableblock halign-left valign-top"><div class="content"></div></td>
-<td class="tableblock halign-left valign-top"><div class="content"></div></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
-<p>error_output</p>
-</div></div></td>
-<td class="tableblock halign-left valign-top"><div class="content"></div></td>
-<td class="tableblock halign-left valign-top"><div class="content"></div></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
-<p>trace_output</p>
-</div></div></td>
-<td class="tableblock halign-left valign-top"><div class="content"></div></td>
-<td class="tableblock halign-left valign-top"><div class="content"></div></td>
-</tr>
-</tbody>
-</table>
+<h5 id="rtti">rtti</h5>
+
 </div>
 </div>
 </div>
