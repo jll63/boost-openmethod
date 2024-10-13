@@ -5,120 +5,75 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.20">
-<meta name="author" content="Emulation of Open Multi-Methods as proposed by N2216 | Jean-Louis Leroy">
-<title>OpenMethod</title>
+<meta name="author" content="Jean-Louis Leroy">
+<title>OpenMethod: an emulation of Open Multi-Methods as proposed by N2216</title>
 <link rel="stylesheet" href="./zajo-dark.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-<meta name="keywords" content="c++,error handling,open source">
-<meta name="description" content="Lightweight Error Augmentation Framework">
-<link rel="stylesheet" href="./zajo-light.css" disabled=true>
-<script>
-function switch_style()
-{
-    var i, tag;
-    for( i=0, tag=document.getElementsByTagName("link"); i<tag.length; i++ )
-        if( tag[i].rel.indexOf("stylesheet")!=-1 && tag[i].href.includes("zajo-") )
-            tag[i].disabled = !tag[i].disabled;
-}
-</script>
 </head>
-<body class="article">
+<body class="article toc2 toc-left">
 <div id="header">
-<h1>OpenMethod<div style="z-index: 3; bottom:-16px; right:4px; position:fixed"><input width="32" height="32" type="image" alt="Skin" src="./skin.png" onclick="this.blur();switch_style();return false;"/></div></h1>
+<h1>OpenMethod: an emulation of Open Multi-Methods as proposed by N2216</h1>
 <div class="details">
-<span id="author" class="author">Emulation of Open Multi-Methods as proposed by N2216 | Jean-Louis Leroy</span><br>
+<span id="author" class="author">Jean-Louis Leroy</span><br>
+</div>
+<div id="toc" class="toc2">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#overview">Overview</a>
+<ul class="sectlevel2">
+<li><a href="#hello_world">Hello World</a></li>
+<li><a href="#next">Next</a></li>
+<li><a href="#multiple_dispatch">Multiple Dispatch</a></li>
+<li><a href="#multiple_inheritance">Multiple Inheritance</a></li>
+<li><a href="#friendship">Friendship</a></li>
+<li><a href="#performance">Performance</a></li>
+<li><a href="#virtual_ptr"><code>virtual_ptr</code></a></li>
+</ul>
+</li>
+<li><a href="#advanced_features">Advanced Features</a>
+<ul class="sectlevel2">
+<li><a href="#core_api">Core API</a></li>
+<li><a href="#policies_and_facets">Policies and Facets</a></li>
+<li><a href="#error_handling">Error Handling</a></li>
+<li><a href="#custom_rtti">Custom RTTI</a></li>
+<li><a href="#deferred_rtti">Deferred RTTI</a></li>
+</ul>
+</li>
+<li><a href="#reference">Reference</a>
+<ul class="sectlevel2">
+<li><a href="#headers">Headers</a></li>
+<li><a href="#namespaces">Namespaces</a></li>
+<li><a href="#macros">Macros</a>
+<ul class="sectlevel3">
+<li><a href="#boost_openmethod">BOOST_OPENMETHOD</a></li>
+<li><a href="#boost_openmethod_override">BOOST_OPENMETHOD_OVERRIDE</a></li>
+<li><a href="#boost_openmethod_override_inline">BOOST_OPENMETHOD_OVERRIDE_INLINE</a></li>
+<li><a href="#boost_openmethod_register">BOOST_OPENMETHOD_REGISTER</a></li>
+<li><a href="#boost_openmethod_name">BOOST_OPENMETHOD_NAME</a></li>
+<li><a href="#boost_openmethod_classes">BOOST_OPENMETHOD_CLASSES</a></li>
+<li><a href="#boost_openmethod_default_policy">BOOST_OPENMETHOD_DEFAULT_POLICY</a></li>
+</ul>
+</li>
+<li><a href="#core_api_2">Core API</a>
+<ul class="sectlevel3">
+<li><a href="#method">method</a></li>
+<li><a href="#virtual">virtual_</a></li>
+<li><a href="#virtual_ptr_2">virtual_ptr</a></li>
+</ul>
+</li>
+<li><a href="#policies_facets">Policies &amp; Facets</a>
+<ul class="sectlevel3">
+<li><a href="#basic_policy">basic_policy</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
 </div>
 </div>
 <div id="content">
-<div id="preamble">
-<div class="sectionbody">
-<div class="paragraph text-right">
-<p><a href="https://github.com/boostorg/OpenMethod">GitHub</a> | <a href="https://boostorg.github.io/OpenMethod/OpenMethod.pdf">PDF</a></p>
-</div>
-</div>
-</div>
 <div class="sect1">
-<h2 id="abstract">Abstract</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>Boost OpenMethod implements Open Multi-Methods.
-Features:</p>
-</div>
-<div class="exampleblock">
-<div class="content">
-<div class="ulist">
-<ul>
-<li>
-<p>Header-only C++17 library.</p>
-</li>
-<li>
-<p>Closely emulates the N2216 standards committee paper, and extend beyond it.</p>
-</li>
-<li>
-<p>Fast dispatch, close or equal in performance to native virtual functions.</p>
-</li>
-<li>
-<p>Interoperable with other C++ constructs: templates, friends, namespaces, etc.</p>
-</li>
-<li>
-<p>Can be used with or without exception handling.</p>
-</li>
-<li>
-<p>Can be used with standard RTTI, or interfaced with custom RTTI.</p>
-</li>
-</ul>
-</div>
-</div>
-</div>
-<table class="tableblock frame-none grid-none stretch">
-<colgroup>
-<col style="width: 50%;">
-<col style="width: 50%;">
-</colgroup>
-<tbody>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="#tutorial">Tutorial</a> | <a href="#synopsis">[synopsis]</a> | <a href="https://github.com/boostorg/OpenMethod/blob/master/doc/whitepaper.md">Whitepaper</a> | <a href="https://github.com/boostorg/OpenMethod/blob/master/benchmark/benchmark.md">Benchmark</a></p></td>
-<td class="tableblock halign-right valign-top"><p class="tableblock">Reference: <a href="#functions">Functions</a> | <a href="#types">Types</a> | <a href="#predicates">Predicates</a> | <a href="#traits">Traits</a> | <a href="#macros">Macros</a></p></td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-<div class="sect1">
-<h2 id="support">Support</h2>
-<div class="sectionbody">
-<div class="ulist">
-<ul>
-<li>
-<p><a href="https://github.com/boostorg/OpenMethod/issues">Report issues</a> on GitHub</p>
-</li>
-</ul>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="distribution">Distribution</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>OpenMethod is distributed under the <a href="http://www.boost.org/LICENSE_1_0.txt">Boost Software License, Version 1.0</a>.</p>
-</div>
-<div class="paragraph">
-<p>There are three distribution channels:</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>OpenMethod is included in official <a href="https://www.boost.org/">Boost</a> releases (starting with Boost 1.75), and therefore available via most package managers.</p>
-</li>
-<li>
-<p>The source code is hosted on <a href="https://github.com/boostorg/OpenMethod">GitHub</a>.</p>
-</li>
-</ul>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="motivation">Motivation</h2>
+<h2 id="overview">Overview</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>Open-methods are similar to virtual functions, but they are not required to be
@@ -150,13 +105,12 @@ happen.</p>
 </div>
 <div class="paragraph">
 <p>This library implements the proposal, as closely as possible within the C++17
-standard.</p>
+standard.
+# Tutorial
+:toc:
+:toc-title:
+:idprefix:</p>
 </div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="tutorial">Tutorial</h2>
-<div class="sectionbody">
 <div class="sect2">
 <h3 id="hello_world">Hello World</h3>
 <div class="paragraph">
@@ -1292,15 +1246,17 @@ custom_type_info Cat::type_info;
 <h4 id="virtual_ptr_2">virtual_ptr</h4>
 
 </div>
+</div>
+<div class="sect2">
+<h3 id="policies_facets">Policies &amp; Facets</h3>
 <div class="sect3">
 <h4 id="basic_policy">basic_policy</h4>
-
-</div>
-<div class="sect3">
-<h4 id="facets">Facets</h4>
 <div class="sect4">
 <h5 id="rtti">rtti</h5>
+<div class="sect5">
+<h6 id="std_rtti">std_rtti</h6>
 
+</div>
 </div>
 </div>
 </div>
