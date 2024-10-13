@@ -1018,62 +1018,14 @@ struct custom_policy
 
 ==== BOOST_OPENMETHOD_DEFAULT_POLICY
 
-==== virtual_
-
-==== virtual_ptr
-
 === Core API
 
 ==== method
 
-==== Policies
+==== virtual_
 
-===== basic_policy
+==== virtual_ptr
 
-==== Facets
+==== basic_policy
 
-===== rtti
-
-===== policies::basic_policy
-
-
- Facets are similar to C++20 concepts: they indicate that certain
- functionalities are available in the policy, but most do not provide them; that
- is the role of a _facet implementation_, which is similar to a model of a
- concept in C++20.
-
-
-OpenMethod provides the following facets and facet implementations.
-
-[cols="a,a,a", options="header"]
-|===
-| Facet
-| Responsibility
-| Implementation
-
-| vptr_placement
-|
-|
-| external_vptr
-|
-|
-| rtti
-|
-|
-| deferred_static_rtti
-|
-|
-| type_hash
-|
-|
-| error_handler
-|
-|
-| error_output
-|
-|
-| trace_output
-|
-|
-
-|===
+==== rtti
