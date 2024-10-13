@@ -1,7 +1,10 @@
+[#tutorial]
 # Tutorial
 :toc:
 :toc-title:
 :idprefix:
+
+foo bar
 
 ## Hello World
 
