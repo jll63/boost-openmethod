@@ -1,0 +1,41 @@
+
+# Reference
+:toc:
+:toc-title:
+:idprefix:
+
+## Headers
+
+## Namespaces
+
+## Macros
+
+### BOOST_OPENMETHOD
+
+### BOOST_OPENMETHOD_OVERRIDE
+
+### BOOST_OPENMETHOD_OVERRIDE_INLINE
+
+### BOOST_OPENMETHOD_REGISTER
+
+### BOOST_OPENMETHOD_NAME
+
+### BOOST_OPENMETHOD_CLASSES
+
+### BOOST_OPENMETHOD_DEFAULT_POLICY
+
+## Core API
+
+### method
+
+### virtual_
+
+### virtual_ptr
+
+## Policies & Facets
+
+### basic_policy
+
+#### rtti
+
+##### std_rtti

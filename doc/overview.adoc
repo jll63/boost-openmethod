@@ -1,0 +1,25 @@
+[#overview]
+# Overview
+
+Open-methods are similar to virtual functions, but they are not required to be
+members of a class. By being simultaneously free _and_ virtual, they provide a
+solution to the Expression Problem:
+
+> Given a set of types, and a set of operations on these types, is it possible
+to add new operations on the existing types, and new types to the existing
+operations, without modifying existing code?
+
+As a bonus, open-methods can take more than one argument into account when
+selecting the appropriate function to call. This solves the problem of multiple
+dispatch.
+
+Open-methods are part of Lisp, Clojure, Julia, Cecil, Dylan, TADS, and other
+languages. Bjarne Stroustrup wanted open-methods in C++ almost from the
+beginning. He writes about it in D&E. Circa 2007, with his PhD students Peter
+Pirkelbauer and Yuriy Solodkyy, they wrote a series of papers and an
+implementation based on the EDG compiler. Their design fit perfectly with othe
+parts of the language. They proposed it for adoption in the standard. It did not
+happen.
+
+This library implements the proposal, as closely as possible within the C++17
+standard.
