@@ -39,3 +39,5 @@
 #### rtti
 
 ##### std_rtti
+
+##### deferred_rtti

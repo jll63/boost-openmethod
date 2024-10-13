@@ -8,6 +8,7 @@
 <meta name="author" content="Jean-Louis Leroy">
 <title>OpenMethod: an emulation of N2216</title>
 <link rel="stylesheet" href="./zajo-dark.css">
+<link rel="stylesheet" href="./rouge-github.css">
 </head>
 <body class="article toc2 toc-left">
 <div id="header">
@@ -135,102 +136,102 @@ functions (on the left side) and open-methods (on the right side):</p>
 <tr>
 <td class="tableblock halign-left valign-top"><div class="content"><div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="c++">#include &lt;iostream&gt;
+<pre class="rouge highlight"><code data-lang="c++"><span class="cp">#include</span> <span class="cpf">&lt;iostream&gt;</span><span class="cp">
+</span>
 
 
+<span class="k">struct</span> <span class="nc">Animal</span> <span class="p">{</span>
+    <span class="k">virtual</span> <span class="o">~</span><span class="n">Animal</span><span class="p">()</span> <span class="o">=</span> <span class="k">default</span><span class="p">;</span>
+    <span class="k">virtual</span> <span class="kt">void</span> <span class="n">poke</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">ostream</span><span class="o">&amp;</span><span class="p">)</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">};</span>
 
-struct Animal {
-    virtual ~Animal() = default;
-    virtual void poke(std::ostream&amp;) = 0;
-};
+<span class="k">struct</span> <span class="nc">Cat</span> <span class="o">:</span> <span class="n">Animal</span> <span class="p">{</span>
+    <span class="kt">void</span> <span class="n">poke</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">ostream</span><span class="o">&amp;</span> <span class="n">os</span><span class="p">)</span> <span class="k">override</span><span class="p">;</span>
+<span class="p">};</span>
 
-struct Cat : Animal {
-    void poke(std::ostream&amp; os) override;
-};
-
-struct Dog : Animal {
-    void poke(std::ostream&amp; os) override;
-};
-
-
-
-
-void Cat::poke(std::ostream&amp; os) override {
-    os &lt;&lt; "hiss";
-}
-
-
-void Dog::poke(std::ostream&amp; os) override {
-    os &lt;&lt; "bark";
-}
+<span class="k">struct</span> <span class="nc">Dog</span> <span class="o">:</span> <span class="n">Animal</span> <span class="p">{</span>
+    <span class="kt">void</span> <span class="n">poke</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">ostream</span><span class="o">&amp;</span> <span class="n">os</span><span class="p">)</span> <span class="k">override</span><span class="p">;</span>
+<span class="p">};</span>
 
 
 
 
-int main() {
+<span class="kt">void</span> <span class="n">Cat</span><span class="o">::</span><span class="n">poke</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">ostream</span><span class="o">&amp;</span> <span class="n">os</span><span class="p">)</span> <span class="k">override</span> <span class="p">{</span>
+    <span class="n">os</span> <span class="o">&lt;&lt;</span> <span class="s">"hiss"</span><span class="p">;</span>
+<span class="p">}</span>
 
 
-    Animal&amp;&amp; a = Cat();
-    Animal&amp;&amp; b = Dog();
+<span class="kt">void</span> <span class="n">Dog</span><span class="o">::</span><span class="n">poke</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">ostream</span><span class="o">&amp;</span> <span class="n">os</span><span class="p">)</span> <span class="k">override</span> <span class="p">{</span>
+    <span class="n">os</span> <span class="o">&lt;&lt;</span> <span class="s">"bark"</span><span class="p">;</span>
+<span class="p">}</span>
 
-    a.poke(std::cout); // prints "hiss"
-    std::cout &lt;&lt; "\n";
 
-    a.poke(std::cout); // prints "bark"
-    std::cout &lt;&lt; "\n";
 
-    return 0;
-}</code></pre>
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+
+
+    <span class="n">Animal</span><span class="o">&amp;&amp;</span> <span class="n">a</span> <span class="o">=</span> <span class="n">Cat</span><span class="p">();</span>
+    <span class="n">Animal</span><span class="o">&amp;&amp;</span> <span class="n">b</span> <span class="o">=</span> <span class="n">Dog</span><span class="p">();</span>
+
+    <span class="n">a</span><span class="p">.</span><span class="n">poke</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="p">);</span> <span class="c1">// prints "hiss"</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+
+    <span class="n">a</span><span class="p">.</span><span class="n">poke</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="p">);</span> <span class="c1">// prints "bark"</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+
+    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span></code></pre>
 </div>
 </div></div></td>
 <td class="tableblock halign-left valign-top"><div class="content"><div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="c++">#include &lt;iostream&gt;
-#include &lt;boost/openmethod.hpp&gt;               <b class="conum">(1)</b>
-#include &lt;boost/openmethod/compiler.hpp&gt;      <b class="conum">(2)</b>
-
-struct Animal {
-    virtual ~Animal() = default;              <b class="conum">(3)</b>
-};
-
-
-struct Cat : Animal {                         <b class="conum">(3)</b>
-};
+<pre class="rouge highlight"><code data-lang="c++"><span class="cp">#include</span> <span class="cpf">&lt;iostream&gt;</span><span class="cp">
+#include</span> <span class="cpf">&lt;boost/openmethod.hpp&gt;</span><span class="c1">               </span><span class="cp"><b class="conum">(1)</b>
+#include</span> <span class="cpf">&lt;boost/openmethod/compiler.hpp&gt;</span><span class="c1">      </span><span class="cp"><b class="conum">(2)</b>
+</span>
+<span class="k">struct</span> <span class="nc">Animal</span> <span class="p">{</span>
+    <span class="k">virtual</span> <span class="o">~</span><span class="n">Animal</span><span class="p">()</span> <span class="o">=</span> <span class="k">default</span><span class="p">;</span>              <b class="conum">(3)</b>
+<span class="p">};</span>
 
 
-struct Dog : Animal {                         <b class="conum">(3)</b>
-};
+<span class="k">struct</span> <span class="nc">Cat</span> <span class="o">:</span> <span class="n">Animal</span> <span class="p">{</span>                         <b class="conum">(3)</b>
+<span class="p">};</span>
 
 
-BOOST_OPENMETHOD(                             <b class="conum">(4)</b>
-    poke, (std::ostream&amp;, virtual_&lt;Animal&amp;&gt;), void);
+<span class="k">struct</span> <span class="nc">Dog</span> <span class="o">:</span> <span class="n">Animal</span> <span class="p">{</span>                         <b class="conum">(3)</b>
+<span class="p">};</span>
 
-BOOST_OPENMETHOD_OVERRIDE(                    <b class="conum">(5)</b>
-    poke, (std::ostream&amp; os, Cat&amp; cat), void) {
-        os &lt;&lt; "hiss";
-}
 
-BOOST_OPENMETHOD_OVERRIDE(                    <b class="conum">(5)</b>
-    poke, (std::ostream&amp; os, Dog&amp; dog), void) {
-        os &lt;&lt; "bark";
-}
+<span class="n">BOOST_OPENMETHOD</span><span class="p">(</span>                             <b class="conum">(4)</b>
+    <span class="n">poke</span><span class="p">,</span> <span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">ostream</span><span class="o">&amp;</span><span class="p">,</span> <span class="n">virtual_</span><span class="o">&lt;</span><span class="n">Animal</span><span class="o">&amp;&gt;</span><span class="p">),</span> <span class="kt">void</span><span class="p">);</span>
 
-BOOST_OPENMETHOD_CLASSES(Animal, Cat, Dog);   <b class="conum">(6)</b>
+<span class="n">BOOST_OPENMETHOD_OVERRIDE</span><span class="p">(</span>                    <b class="conum">(5)</b>
+    <span class="n">poke</span><span class="p">,</span> <span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">ostream</span><span class="o">&amp;</span> <span class="n">os</span><span class="p">,</span> <span class="n">Cat</span><span class="o">&amp;</span> <span class="n">cat</span><span class="p">),</span> <span class="kt">void</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">os</span> <span class="o">&lt;&lt;</span> <span class="s">"hiss"</span><span class="p">;</span>
+<span class="p">}</span>
 
-int main() {
-    boost::openmethod::initialize();          <b class="conum">(7)</b>
+<span class="n">BOOST_OPENMETHOD_OVERRIDE</span><span class="p">(</span>                    <b class="conum">(5)</b>
+    <span class="n">poke</span><span class="p">,</span> <span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">ostream</span><span class="o">&amp;</span> <span class="n">os</span><span class="p">,</span> <span class="n">Dog</span><span class="o">&amp;</span> <span class="n">dog</span><span class="p">),</span> <span class="kt">void</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">os</span> <span class="o">&lt;&lt;</span> <span class="s">"bark"</span><span class="p">;</span>
+<span class="p">}</span>
 
-    std::unique_ptr&lt;Animal&gt; a(new Cat);
-    std::unique_ptr&lt;Animal&gt; b(new Dog);
+<span class="n">BOOST_OPENMETHOD_CLASSES</span><span class="p">(</span><span class="n">Animal</span><span class="p">,</span> <span class="n">Cat</span><span class="p">,</span> <span class="n">Dog</span><span class="p">);</span>   <b class="conum">(6)</b>
 
-    poke(std::cout, a); // prints "hiss"      <b class="conum">(8)</b>
-    std::cout &lt;&lt; "\n";
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+    <span class="n">boost</span><span class="o">::</span><span class="n">openmethod</span><span class="o">::</span><span class="n">initialize</span><span class="p">();</span>          <b class="conum">(7)</b>
 
-    poke(std::cout, b); // prints "bark"      <b class="conum">(8)</b>
-    std::cout &lt;&lt; "\n";
+    <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">Animal</span><span class="o">&gt;</span> <span class="n">a</span><span class="p">(</span><span class="k">new</span> <span class="n">Cat</span><span class="p">);</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">Animal</span><span class="o">&gt;</span> <span class="n">b</span><span class="p">(</span><span class="k">new</span> <span class="n">Dog</span><span class="p">);</span>
 
-    return 0;
-}</code></pre>
+    <span class="n">poke</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="p">,</span> <span class="n">a</span><span class="p">);</span> <span class="c1">// prints "hiss"      </span><b class="conum">(8)</b>
+    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+
+    <span class="n">poke</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="p">,</span> <span class="n">b</span><span class="p">);</span> <span class="c1">// prints "bark"      </span><b class="conum">(8)</b>
+    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+
+    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span></code></pre>
 </div>
 </div></div></td>
 </tr>
@@ -285,16 +286,16 @@ not exist.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="c++">struct Bulldog : Dog {
-};
+<pre class="rouge highlight"><code data-lang="c++"><span class="k">struct</span> <span class="nc">Bulldog</span> <span class="o">:</span> <span class="n">Dog</span> <span class="p">{</span>
+<span class="p">};</span>
 
-BOOST_OPENMETHOD_CLASSES(Dog, Bulldog);
+<span class="n">BOOST_OPENMETHOD_CLASSES</span><span class="p">(</span><span class="n">Dog</span><span class="p">,</span> <span class="n">Bulldog</span><span class="p">);</span>
 
-BOOST_OPENMETHOD_OVERRIDE(
-    poke, (std::ostream&amp; os, const Bulldog&amp; dog), void) {
-        next(os, dog); // prints "bark"
-        os &lt;&lt; " and bite";
-}</code></pre>
+<span class="n">BOOST_OPENMETHOD_OVERRIDE</span><span class="p">(</span>
+    <span class="n">poke</span><span class="p">,</span> <span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">ostream</span><span class="o">&amp;</span> <span class="n">os</span><span class="p">,</span> <span class="k">const</span> <span class="n">Bulldog</span><span class="o">&amp;</span> <span class="n">dog</span><span class="p">),</span> <span class="kt">void</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">next</span><span class="p">(</span><span class="n">os</span><span class="p">,</span> <span class="n">dog</span><span class="p">);</span> <span class="c1">// prints "bark"</span>
+        <span class="n">os</span> <span class="o">&lt;&lt;</span> <span class="s">" and bite"</span><span class="p">;</span>
+<span class="p">}</span></code></pre>
 </div>
 </div>
 </div>
@@ -305,26 +306,26 @@ BOOST_OPENMETHOD_OVERRIDE(
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="c++">BOOST_OPENMETHOD(
-    encounter, (std::ostream&amp;, virtual_&lt;Animal&amp;&gt;, virtual_&lt;Animal&amp;&gt;), void);
+<pre class="rouge highlight"><code data-lang="c++"><span class="n">BOOST_OPENMETHOD</span><span class="p">(</span>
+    <span class="n">encounter</span><span class="p">,</span> <span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">ostream</span><span class="o">&amp;</span><span class="p">,</span> <span class="n">virtual_</span><span class="o">&lt;</span><span class="n">Animal</span><span class="o">&amp;&gt;</span><span class="p">,</span> <span class="n">virtual_</span><span class="o">&lt;</span><span class="n">Animal</span><span class="o">&amp;&gt;</span><span class="p">),</span> <span class="kt">void</span><span class="p">);</span>
 
-// 'encounter' catch-all implementation.
-BOOST_OPENMETHOD_OVERRIDE(encounter, (std::ostream&amp; os, Animal&amp;, Animal&amp;), void) {
-    os &lt;&lt; "ignore";
-}
+<span class="c1">// 'encounter' catch-all implementation.</span>
+<span class="n">BOOST_OPENMETHOD_OVERRIDE</span><span class="p">(</span><span class="n">encounter</span><span class="p">,</span> <span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">ostream</span><span class="o">&amp;</span> <span class="n">os</span><span class="p">,</span> <span class="n">Animal</span><span class="o">&amp;</span><span class="p">,</span> <span class="n">Animal</span><span class="o">&amp;</span><span class="p">),</span> <span class="kt">void</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">os</span> <span class="o">&lt;&lt;</span> <span class="s">"ignore"</span><span class="p">;</span>
+<span class="p">}</span>
 
-// Add definitions for specific pairs of animals.
-BOOST_OPENMETHOD_OVERRIDE(encounter, (std::ostream&amp; os, Dog&amp; dog1, Dog&amp; dog2), void) {
-    os &lt;&lt; "wag tail";
-}
+<span class="c1">// Add definitions for specific pairs of animals.</span>
+<span class="n">BOOST_OPENMETHOD_OVERRIDE</span><span class="p">(</span><span class="n">encounter</span><span class="p">,</span> <span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">ostream</span><span class="o">&amp;</span> <span class="n">os</span><span class="p">,</span> <span class="n">Dog</span><span class="o">&amp;</span> <span class="n">dog1</span><span class="p">,</span> <span class="n">Dog</span><span class="o">&amp;</span> <span class="n">dog2</span><span class="p">),</span> <span class="kt">void</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">os</span> <span class="o">&lt;&lt;</span> <span class="s">"wag tail"</span><span class="p">;</span>
+<span class="p">}</span>
 
-BOOST_OPENMETHOD_OVERRIDE(encounter, (std::ostream&amp; os, Dog&amp; dog, Cat&amp; cat), void) {
-    os &lt;&lt; "chase";
-}
+<span class="n">BOOST_OPENMETHOD_OVERRIDE</span><span class="p">(</span><span class="n">encounter</span><span class="p">,</span> <span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">ostream</span><span class="o">&amp;</span> <span class="n">os</span><span class="p">,</span> <span class="n">Dog</span><span class="o">&amp;</span> <span class="n">dog</span><span class="p">,</span> <span class="n">Cat</span><span class="o">&amp;</span> <span class="n">cat</span><span class="p">),</span> <span class="kt">void</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">os</span> <span class="o">&lt;&lt;</span> <span class="s">"chase"</span><span class="p">;</span>
+<span class="p">}</span>
 
-BOOST_OPENMETHOD_OVERRIDE(encounter, (std::ostream&amp; os, Cat&amp; cat, Dog&amp; dog), void) {
-    os &lt;&lt; "run";
-}</code></pre>
+<span class="n">BOOST_OPENMETHOD_OVERRIDE</span><span class="p">(</span><span class="n">encounter</span><span class="p">,</span> <span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">ostream</span><span class="o">&amp;</span> <span class="n">os</span><span class="p">,</span> <span class="n">Cat</span><span class="o">&amp;</span> <span class="n">cat</span><span class="p">,</span> <span class="n">Dog</span><span class="o">&amp;</span> <span class="n">dog</span><span class="p">),</span> <span class="kt">void</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">os</span> <span class="o">&lt;&lt;</span> <span class="s">"run"</span><span class="p">;</span>
+<span class="p">}</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -444,34 +445,34 @@ example:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="c++">BOOST_OPENMETHOD(vocalize, (std::ostream&amp;, virtual_ptr&lt;Animal&gt;), void);
+<pre class="rouge highlight"><code data-lang="c++"><span class="n">BOOST_OPENMETHOD</span><span class="p">(</span><span class="n">vocalize</span><span class="p">,</span> <span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">ostream</span><span class="o">&amp;</span><span class="p">,</span> <span class="n">virtual_ptr</span><span class="o">&lt;</span><span class="n">Animal</span><span class="o">&gt;</span><span class="p">),</span> <span class="kt">void</span><span class="p">);</span>
 
-BOOST_OPENMETHOD_OVERRIDE(
-    vocalize, (std::ostream &amp; os, virtual_ptr&lt;Cat&gt; cat), void) {
-    os &lt;&lt; "hiss";
-}
+<span class="n">BOOST_OPENMETHOD_OVERRIDE</span><span class="p">(</span>
+    <span class="n">vocalize</span><span class="p">,</span> <span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">ostream</span> <span class="o">&amp;</span> <span class="n">os</span><span class="p">,</span> <span class="n">virtual_ptr</span><span class="o">&lt;</span><span class="n">Cat</span><span class="o">&gt;</span> <span class="n">cat</span><span class="p">),</span> <span class="kt">void</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">os</span> <span class="o">&lt;&lt;</span> <span class="s">"hiss"</span><span class="p">;</span>
+<span class="p">}</span>
 
-BOOST_OPENMETHOD_OVERRIDE(
-    vocalize, (std::ostream &amp; os, virtual_ptr&lt;Dog&gt; dog), void) {
-    os &lt;&lt; "bark";
-}
+<span class="n">BOOST_OPENMETHOD_OVERRIDE</span><span class="p">(</span>
+    <span class="n">vocalize</span><span class="p">,</span> <span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">ostream</span> <span class="o">&amp;</span> <span class="n">os</span><span class="p">,</span> <span class="n">virtual_ptr</span><span class="o">&lt;</span><span class="n">Dog</span><span class="o">&gt;</span> <span class="n">dog</span><span class="p">),</span> <span class="kt">void</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">os</span> <span class="o">&lt;&lt;</span> <span class="s">"bark"</span><span class="p">;</span>
+<span class="p">}</span>
 
-BOOST_OPENMETHOD(
-    encounter, (std::ostream&amp;, virtual_ptr&lt;Animal&gt;, virtual_ptr&lt;Animal&gt;), void);
+<span class="n">BOOST_OPENMETHOD</span><span class="p">(</span>
+    <span class="n">encounter</span><span class="p">,</span> <span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">ostream</span><span class="o">&amp;</span><span class="p">,</span> <span class="n">virtual_ptr</span><span class="o">&lt;</span><span class="n">Animal</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">virtual_ptr</span><span class="o">&lt;</span><span class="n">Animal</span><span class="o">&gt;</span><span class="p">),</span> <span class="kt">void</span><span class="p">);</span>
 
-BOOST_OPENMETHOD_OVERRIDE(
-    encounter, (std::ostream &amp; os, virtual_ptr&lt;Dog&gt; dog, virtual_ptr&lt;Cat&gt; cat),
-    void) {
-    vocalize(os, dog);
-    os &lt;&lt; " and chase";
-}
+<span class="n">BOOST_OPENMETHOD_OVERRIDE</span><span class="p">(</span>
+    <span class="n">encounter</span><span class="p">,</span> <span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">ostream</span> <span class="o">&amp;</span> <span class="n">os</span><span class="p">,</span> <span class="n">virtual_ptr</span><span class="o">&lt;</span><span class="n">Dog</span><span class="o">&gt;</span> <span class="n">dog</span><span class="p">,</span> <span class="n">virtual_ptr</span><span class="o">&lt;</span><span class="n">Cat</span><span class="o">&gt;</span> <span class="n">cat</span><span class="p">),</span>
+    <span class="kt">void</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">vocalize</span><span class="p">(</span><span class="n">os</span><span class="p">,</span> <span class="n">dog</span><span class="p">);</span>
+    <span class="n">os</span> <span class="o">&lt;&lt;</span> <span class="s">" and chase"</span><span class="p">;</span>
+<span class="p">}</span>
 
-BOOST_OPENMETHOD_OVERRIDE(
-    encounter, (std::ostream &amp; os, virtual_ptr&lt;Cat&gt; cat, virtual_ptr&lt;Dog&gt; dog),
-    void) {
-    vocalize(os, cat);
-    os &lt;&lt; " and run";
-}</code></pre>
+<span class="n">BOOST_OPENMETHOD_OVERRIDE</span><span class="p">(</span>
+    <span class="n">encounter</span><span class="p">,</span> <span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">ostream</span> <span class="o">&amp;</span> <span class="n">os</span><span class="p">,</span> <span class="n">virtual_ptr</span><span class="o">&lt;</span><span class="n">Cat</span><span class="o">&gt;</span> <span class="n">cat</span><span class="p">,</span> <span class="n">virtual_ptr</span><span class="o">&lt;</span><span class="n">Dog</span><span class="o">&gt;</span> <span class="n">dog</span><span class="p">),</span>
+    <span class="kt">void</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">vocalize</span><span class="p">(</span><span class="n">os</span><span class="p">,</span> <span class="n">cat</span><span class="p">);</span>
+    <span class="n">os</span> <span class="o">&lt;&lt;</span> <span class="s">" and run"</span><span class="p">;</span>
+<span class="p">}</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -516,14 +517,14 @@ situations, for example when combining open methods and templates.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="c++">#include &lt;boost/openmethod/core.hpp&gt;
+<pre class="rouge highlight"><code data-lang="c++"><span class="cp">#include</span> <span class="cpf">&lt;boost/openmethod/core.hpp&gt;</span><span class="cp">
+</span>
+<span class="k">using</span> <span class="k">namespace</span> <span class="n">boost</span><span class="o">::</span><span class="n">openmethod</span><span class="p">;</span>
 
-using namespace boost::openmethod;
+<span class="k">class</span> <span class="nc">poke_openmethod</span><span class="p">;</span>
 
-class poke_openmethod;
-
-using poke = method&lt;
-    poke_openmethod(std::ostream&amp;, virtual_&lt;Animal&amp;&gt;), void&gt;;</code></pre>
+<span class="k">using</span> <span class="n">poke</span> <span class="o">=</span> <span class="n">method</span><span class="o">&lt;</span>
+    <span class="n">poke_openmethod</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">ostream</span><span class="o">&amp;</span><span class="p">,</span> <span class="n">virtual_</span><span class="o">&lt;</span><span class="n">Animal</span><span class="o">&amp;&gt;</span><span class="p">),</span> <span class="kt">void</span><span class="o">&gt;</span><span class="p">;</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -538,12 +539,12 @@ name can get tedious, so OpenMethod provides a macro for that:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="c++">#include &lt;boost/openmethod/macros/name.hpp&gt;
+<pre class="rouge highlight"><code data-lang="c++"><span class="cp">#include</span> <span class="cpf">&lt;boost/openmethod/macros/name.hpp&gt;</span><span class="cp">
+</span>
+<span class="k">class</span> <span class="nf">BOOST_OPENMETHOD_NAME</span><span class="p">(</span><span class="n">pet</span><span class="p">);</span>
 
-class BOOST_OPENMETHOD_NAME(pet);
-
-using pet = method&lt;
-    BOOST_OPENMETHOD_NAME(pet)(std::ostream&amp;, virtual_&lt;Animal&amp;&gt;), void&gt;;</code></pre>
+<span class="k">using</span> <span class="n">pet</span> <span class="o">=</span> <span class="n">method</span><span class="o">&lt;</span>
+    <span class="n">BOOST_OPENMETHOD_NAME</span><span class="p">(</span><span class="n">pet</span><span class="p">)(</span><span class="n">std</span><span class="o">::</span><span class="n">ostream</span><span class="o">&amp;</span><span class="p">,</span> <span class="n">virtual_</span><span class="o">&lt;</span><span class="n">Animal</span><span class="o">&amp;&gt;</span><span class="p">),</span> <span class="kt">void</span><span class="o">&gt;</span><span class="p">;</span></code></pre>
 </div>
 </div>
 <div class="admonitionblock note">
@@ -565,7 +566,7 @@ styles.
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="c++">poke::fn(std::cout, animal);</code></pre>
+<pre class="rouge highlight"><code data-lang="c++"><span class="n">poke</span><span class="o">::</span><span class="n">fn</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="p">,</span> <span class="n">animal</span><span class="p">);</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -574,11 +575,11 @@ styles.
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="c++">auto poke_cat(std::ostream&amp; os, Cat&amp; cat, void) {
-    os &lt;&lt; "hiss";
-}
+<pre class="rouge highlight"><code data-lang="c++"><span class="k">auto</span> <span class="nf">poke_cat</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">ostream</span><span class="o">&amp;</span> <span class="n">os</span><span class="p">,</span> <span class="n">Cat</span><span class="o">&amp;</span> <span class="n">cat</span><span class="p">,</span> <span class="kt">void</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">os</span> <span class="o">&lt;&lt;</span> <span class="s">"hiss"</span><span class="p">;</span>
+<span class="p">}</span>
 
-static poke::override&lt;poke_cat&gt; override_poke_cat;</code></pre>
+<span class="k">static</span> <span class="n">poke</span><span class="o">::</span><span class="k">override</span><span class="o">&lt;</span><span class="n">poke_cat</span><span class="o">&gt;</span> <span class="n">override_poke_cat</span><span class="p">;</span></code></pre>
 </div>
 </div>
 <div class="admonitionblock note">
@@ -599,13 +600,13 @@ OpenMethod provides a small convenience macro:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="c++">#include &lt;boost/openmethod/macros/register.hpp&gt;
+<pre class="rouge highlight"><code data-lang="c++"><span class="cp">#include</span> <span class="cpf">&lt;boost/openmethod/macros/register.hpp&gt;</span><span class="cp">
+</span>
+<span class="k">auto</span> <span class="nf">poke_dog</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">ostream</span><span class="o">&amp;</span> <span class="n">os</span><span class="p">,</span> <span class="n">Dog</span><span class="o">&amp;</span> <span class="n">dog</span><span class="p">,</span> <span class="kt">void</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">os</span> <span class="o">&lt;&lt;</span> <span class="s">"bark"</span><span class="p">;</span>
+<span class="p">}</span>
 
-auto poke_dog(std::ostream&amp; os, Dog&amp; dog, void) {
-    os &lt;&lt; "bark";
-}
-
-BOOST_OPENMETHOD_REGISTER(poke::override&lt;poke_dog&gt;);</code></pre>
+<span class="n">BOOST_OPENMETHOD_REGISTER</span><span class="p">(</span><span class="n">poke</span><span class="o">::</span><span class="k">override</span><span class="o">&lt;</span><span class="n">poke_dog</span><span class="o">&gt;</span><span class="p">);</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -613,12 +614,12 @@ BOOST_OPENMETHOD_REGISTER(poke::override&lt;poke_dog&gt;);</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="c++">auto poke_bulldog(std::ostream&amp; os, Bulldog&amp; dog, void) -&gt; void {
-    poke::next&lt;poke_bulldog&gt;(os, dog);
-    os &lt;&lt; " and bite";
-}
+<pre class="rouge highlight"><code data-lang="c++"><span class="k">auto</span> <span class="nf">poke_bulldog</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">ostream</span><span class="o">&amp;</span> <span class="n">os</span><span class="p">,</span> <span class="n">Bulldog</span><span class="o">&amp;</span> <span class="n">dog</span><span class="p">,</span> <span class="kt">void</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">void</span> <span class="p">{</span>
+    <span class="n">poke</span><span class="o">::</span><span class="n">next</span><span class="o">&lt;</span><span class="n">poke_bulldog</span><span class="o">&gt;</span><span class="p">(</span><span class="n">os</span><span class="p">,</span> <span class="n">dog</span><span class="p">);</span>
+    <span class="n">os</span> <span class="o">&lt;&lt;</span> <span class="s">" and bite"</span><span class="p">;</span>
+<span class="p">}</span>
 
-BOOST_OPENMETHOD_REGISTER(poke::override&lt;poke_bulldog&gt;);</code></pre>
+<span class="n">BOOST_OPENMETHOD_REGISTER</span><span class="p">(</span><span class="n">poke</span><span class="o">::</span><span class="k">override</span><span class="o">&lt;</span><span class="n">poke_bulldog</span><span class="o">&gt;</span><span class="p">);</span></code></pre>
 </div>
 </div>
 <div class="admonitionblock note">
@@ -643,22 +644,22 @@ loading.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="c++">BOOST_OPENMETHOD_CLASSES(Animal, Cat, Dog, Bulldog);</code></pre>
+<pre class="rouge highlight"><code data-lang="c++"><span class="n">BOOST_OPENMETHOD_CLASSES</span><span class="p">(</span><span class="n">Animal</span><span class="p">,</span> <span class="n">Cat</span><span class="p">,</span> <span class="n">Dog</span><span class="p">,</span> <span class="n">Bulldog</span><span class="p">);</span></code></pre>
 </div>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="c++">int main() {
-    boost::openmethod::initialize();
+<pre class="rouge highlight"><code data-lang="c++"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+    <span class="n">boost</span><span class="o">::</span><span class="n">openmethod</span><span class="o">::</span><span class="n">initialize</span><span class="p">();</span>
 
-    Animal&amp;&amp; a = Cat();
-    Animal&amp;&amp; b = Dog();
+    <span class="n">Animal</span><span class="o">&amp;&amp;</span> <span class="n">a</span> <span class="o">=</span> <span class="n">Cat</span><span class="p">();</span>
+    <span class="n">Animal</span><span class="o">&amp;&amp;</span> <span class="n">b</span> <span class="o">=</span> <span class="n">Dog</span><span class="p">();</span>
 
-    poke(std::cout, a); // prints "hiss"
-    poke(std::cout, b); // prints "bark"
+    <span class="n">poke</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="p">,</span> <span class="n">a</span><span class="p">);</span> <span class="c1">// prints "hiss"</span>
+    <span class="n">poke</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="p">,</span> <span class="n">b</span><span class="p">);</span> <span class="c1">// prints "bark"</span>
 
-    return 0;
-}</code></pre>
+    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span></code></pre>
 </div>
 </div>
 </div>
@@ -766,9 +767,9 @@ is a tweak of <code>policies::release</code>:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="c++">struct debug : release::rebind&lt;debug&gt;::add&lt;
-                   runtime_checks, basic_error_output&lt;debug&gt;,
-                   basic_trace_output&lt;debug&gt;&gt; {};</code></pre>
+<pre class="rouge highlight"><code data-lang="c++"><span class="k">struct</span> <span class="nc">debug</span> <span class="o">:</span> <span class="n">release</span><span class="o">::</span><span class="n">rebind</span><span class="o">&lt;</span><span class="n">debug</span><span class="o">&gt;::</span><span class="n">add</span><span class="o">&lt;</span>
+                   <span class="n">runtime_checks</span><span class="p">,</span> <span class="n">basic_error_output</span><span class="o">&lt;</span><span class="n">debug</span><span class="o">&gt;</span><span class="p">,</span>
+                   <span class="n">basic_trace_output</span><span class="o">&lt;</span><span class="n">debug</span><span class="o">&gt;&gt;</span> <span class="p">{};</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -804,44 +805,44 @@ error to <code>stderr</code> in the <code>debug</code> policy, and does nothing 
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="c++">BOOST_OPENMETHOD_CLASSES(Animal, Cat, Dog);
+<pre class="rouge highlight"><code data-lang="c++"><span class="n">BOOST_OPENMETHOD_CLASSES</span><span class="p">(</span><span class="n">Animal</span><span class="p">,</span> <span class="n">Cat</span><span class="p">,</span> <span class="n">Dog</span><span class="p">);</span>
 
-BOOST_OPENMETHOD(trick, (std::ostream&amp;, virtual_&lt;Animal&amp;&gt;), void);
+<span class="n">BOOST_OPENMETHOD</span><span class="p">(</span><span class="n">trick</span><span class="p">,</span> <span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">ostream</span><span class="o">&amp;</span><span class="p">,</span> <span class="n">virtual_</span><span class="o">&lt;</span><span class="n">Animal</span><span class="o">&amp;&gt;</span><span class="p">),</span> <span class="kt">void</span><span class="p">);</span>
 
-BOOST_OPENMETHOD_OVERRIDE(trick, (std::ostream &amp; os, Dog&amp; dog), void) {
-    os &lt;&lt; "spin\n";
-}
+<span class="n">BOOST_OPENMETHOD_OVERRIDE</span><span class="p">(</span><span class="n">trick</span><span class="p">,</span> <span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">ostream</span> <span class="o">&amp;</span> <span class="n">os</span><span class="p">,</span> <span class="n">Dog</span><span class="o">&amp;</span> <span class="n">dog</span><span class="p">),</span> <span class="kt">void</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">os</span> <span class="o">&lt;&lt;</span> <span class="s">"spin</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<span class="p">}</span>
 
-int main() {
-    namespace bom = boost::openmethod;
-    bom::initialize();
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">namespace</span> <span class="n">bom</span> <span class="o">=</span> <span class="n">boost</span><span class="o">::</span><span class="n">openmethod</span><span class="p">;</span>
+    <span class="n">bom</span><span class="o">::</span><span class="n">initialize</span><span class="p">();</span>
 
-    bom::policies::default_::set_error_handler([](const auto&amp; error) {
-        std::visit([](auto&amp;&amp; arg) { throw arg; }, error);
-    });
+    <span class="n">bom</span><span class="o">::</span><span class="n">policies</span><span class="o">::</span><span class="n">default_</span><span class="o">::</span><span class="n">set_error_handler</span><span class="p">([](</span><span class="k">const</span> <span class="k">auto</span><span class="o">&amp;</span> <span class="n">error</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">std</span><span class="o">::</span><span class="n">visit</span><span class="p">([](</span><span class="k">auto</span><span class="o">&amp;&amp;</span> <span class="n">arg</span><span class="p">)</span> <span class="p">{</span> <span class="k">throw</span> <span class="n">arg</span><span class="p">;</span> <span class="p">},</span> <span class="n">error</span><span class="p">);</span>
+    <span class="p">});</span>
 
-    Cat felix;
-    Dog hector, snoopy;
-    std::vector&lt;Animal*&gt; animals = {&amp;hector, &amp;felix, &amp;snoopy};
+    <span class="n">Cat</span> <span class="n">felix</span><span class="p">;</span>
+    <span class="n">Dog</span> <span class="n">hector</span><span class="p">,</span> <span class="n">snoopy</span><span class="p">;</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">Animal</span><span class="o">*&gt;</span> <span class="n">animals</span> <span class="o">=</span> <span class="p">{</span><span class="o">&amp;</span><span class="n">hector</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">felix</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">snoopy</span><span class="p">};</span>
 
-    for (auto animal : animals) {
-        try {
-            trick(std::cout, *animal);
-        } catch (bom::not_implemented_error) {
-            std::cerr &lt;&lt; boost::core::demangle(typeid(*animal).name())
-                      &lt;&lt; "s don't perform tricks\n";
-        }
-    }
+    <span class="k">for</span> <span class="p">(</span><span class="k">auto</span> <span class="n">animal</span> <span class="o">:</span> <span class="n">animals</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">try</span> <span class="p">{</span>
+            <span class="n">trick</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="p">,</span> <span class="o">*</span><span class="n">animal</span><span class="p">);</span>
+        <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="n">bom</span><span class="o">::</span><span class="n">not_implemented_error</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">std</span><span class="o">::</span><span class="n">cerr</span> <span class="o">&lt;&lt;</span> <span class="n">boost</span><span class="o">::</span><span class="n">core</span><span class="o">::</span><span class="n">demangle</span><span class="p">(</span><span class="k">typeid</span><span class="p">(</span><span class="o">*</span><span class="n">animal</span><span class="p">).</span><span class="n">name</span><span class="p">())</span>
+                      <span class="o">&lt;&lt;</span> <span class="s">"s don't perform tricks</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
 
-    return 0;
-}</code></pre>
+    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span></code></pre>
 </div>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="console">spin
+<pre class="rouge highlight"><code data-lang="console"><span class="go">spin
 Cats don't perform tricks
-spin</code></pre>
+spin</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -850,39 +851,39 @@ facet implementaion.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="c++">namespace bom = boost::openmethod;
+<pre class="rouge highlight"><code data-lang="c++"><span class="k">namespace</span> <span class="n">bom</span> <span class="o">=</span> <span class="n">boost</span><span class="o">::</span><span class="n">openmethod</span><span class="p">;</span>
 
-struct throwing_policy
-    : bom::policies::default_::rebind&lt;throwing_policy&gt;::replace&lt;
-          bom::policies::error_handler, bom::policies::throw_error&gt; {};
+<span class="k">struct</span> <span class="nc">throwing_policy</span>
+    <span class="o">:</span> <span class="n">bom</span><span class="o">::</span><span class="n">policies</span><span class="o">::</span><span class="n">default_</span><span class="o">::</span><span class="n">rebind</span><span class="o">&lt;</span><span class="n">throwing_policy</span><span class="o">&gt;::</span><span class="n">replace</span><span class="o">&lt;</span>
+          <span class="n">bom</span><span class="o">::</span><span class="n">policies</span><span class="o">::</span><span class="n">error_handler</span><span class="p">,</span> <span class="n">bom</span><span class="o">::</span><span class="n">policies</span><span class="o">::</span><span class="n">throw_error</span><span class="o">&gt;</span> <span class="p">{};</span>
 
-BOOST_OPENMETHOD_CLASSES(Animal, Cat, Dog, throwing_policy);
+<span class="n">BOOST_OPENMETHOD_CLASSES</span><span class="p">(</span><span class="n">Animal</span><span class="p">,</span> <span class="n">Cat</span><span class="p">,</span> <span class="n">Dog</span><span class="p">,</span> <span class="n">throwing_policy</span><span class="p">);</span>
 
-BOOST_OPENMETHOD(
-    trick, (std::ostream&amp;, virtual_&lt;Animal&amp;&gt;), void, throwing_policy);
+<span class="n">BOOST_OPENMETHOD</span><span class="p">(</span>
+    <span class="n">trick</span><span class="p">,</span> <span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">ostream</span><span class="o">&amp;</span><span class="p">,</span> <span class="n">virtual_</span><span class="o">&lt;</span><span class="n">Animal</span><span class="o">&amp;&gt;</span><span class="p">),</span> <span class="kt">void</span><span class="p">,</span> <span class="n">throwing_policy</span><span class="p">);</span>
 
-BOOST_OPENMETHOD_OVERRIDE(trick, (std::ostream &amp; os, Dog&amp; dog), void) {
-    os &lt;&lt; "spin\n";
-}
+<span class="n">BOOST_OPENMETHOD_OVERRIDE</span><span class="p">(</span><span class="n">trick</span><span class="p">,</span> <span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">ostream</span> <span class="o">&amp;</span> <span class="n">os</span><span class="p">,</span> <span class="n">Dog</span><span class="o">&amp;</span> <span class="n">dog</span><span class="p">),</span> <span class="kt">void</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">os</span> <span class="o">&lt;&lt;</span> <span class="s">"spin</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<span class="p">}</span>
 
-int main() {
-    bom::initialize&lt;throwing_policy&gt;();
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+    <span class="n">bom</span><span class="o">::</span><span class="n">initialize</span><span class="o">&lt;</span><span class="n">throwing_policy</span><span class="o">&gt;</span><span class="p">();</span>
 
-    Cat felix;
-    Dog hector, snoopy;
-    std::vector&lt;Animal*&gt; animals = {&amp;hector, &amp;felix, &amp;snoopy};
+    <span class="n">Cat</span> <span class="n">felix</span><span class="p">;</span>
+    <span class="n">Dog</span> <span class="n">hector</span><span class="p">,</span> <span class="n">snoopy</span><span class="p">;</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">Animal</span><span class="o">*&gt;</span> <span class="n">animals</span> <span class="o">=</span> <span class="p">{</span><span class="o">&amp;</span><span class="n">hector</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">felix</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">snoopy</span><span class="p">};</span>
 
-    for (auto animal : animals) {
-        try {
-            trick(std::cout, *animal);
-        } catch (bom::not_implemented_error) {
-            std::cerr &lt;&lt; boost::core::demangle(typeid(*animal).name())
-                      &lt;&lt; "s don't perform tricks\n";
-        }
-    }
+    <span class="k">for</span> <span class="p">(</span><span class="k">auto</span> <span class="n">animal</span> <span class="o">:</span> <span class="n">animals</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">try</span> <span class="p">{</span>
+            <span class="n">trick</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="p">,</span> <span class="o">*</span><span class="n">animal</span><span class="p">);</span>
+        <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="n">bom</span><span class="o">::</span><span class="n">not_implemented_error</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">std</span><span class="o">::</span><span class="n">cerr</span> <span class="o">&lt;&lt;</span> <span class="n">boost</span><span class="o">::</span><span class="n">core</span><span class="o">::</span><span class="n">demangle</span><span class="p">(</span><span class="k">typeid</span><span class="p">(</span><span class="o">*</span><span class="n">animal</span><span class="p">).</span><span class="n">name</span><span class="p">())</span>
+                      <span class="o">&lt;&lt;</span> <span class="s">"s don't perform tricks</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
 
-    return 0;
-}</code></pre>
+    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span></code></pre>
 </div>
 </div>
 </div>
@@ -894,31 +895,31 @@ source:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="c++">struct std_rtti : rtti {
-    template&lt;typename T&gt;
-    static type_id static_type() {
-        return reinterpret_cast&lt;type_id&gt;(&amp;typeid(T));
-    }
+<pre class="rouge highlight"><code data-lang="c++"><span class="k">struct</span> <span class="nc">std_rtti</span> <span class="o">:</span> <span class="n">rtti</span> <span class="p">{</span>
+    <span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="nc">T</span><span class="p">&gt;</span>
+    <span class="k">static</span> <span class="n">type_id</span> <span class="n">static_type</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="k">reinterpret_cast</span><span class="o">&lt;</span><span class="n">type_id</span><span class="o">&gt;</span><span class="p">(</span><span class="o">&amp;</span><span class="k">typeid</span><span class="p">(</span><span class="n">T</span><span class="p">));</span>
+    <span class="p">}</span>
 
-    template&lt;typename T&gt;
-    static type_id dynamic_type(const T&amp; obj) {
-        return reinterpret_cast&lt;type_id&gt;(&amp;typeid(obj));
-    }
+    <span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="nc">T</span><span class="p">&gt;</span>
+    <span class="k">static</span> <span class="n">type_id</span> <span class="nf">dynamic_type</span><span class="p">(</span><span class="k">const</span> <span class="n">T</span><span class="o">&amp;</span> <span class="n">obj</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="k">reinterpret_cast</span><span class="o">&lt;</span><span class="n">type_id</span><span class="o">&gt;</span><span class="p">(</span><span class="o">&amp;</span><span class="k">typeid</span><span class="p">(</span><span class="n">obj</span><span class="p">));</span>
+    <span class="p">}</span>
 
-    template&lt;class Stream&gt;
-    static void type_name(type_id type, Stream&amp; stream) {
-        stream &lt;&lt; reinterpret_cast&lt;const std::type_info*&gt;(type)-&gt;name();
-    }
+    <span class="k">template</span><span class="o">&lt;</span><span class="k">class</span> <span class="nc">Stream</span><span class="p">&gt;</span>
+    <span class="k">static</span> <span class="kt">void</span> <span class="nf">type_name</span><span class="p">(</span><span class="n">type_id</span> <span class="n">type</span><span class="p">,</span> <span class="n">Stream</span><span class="o">&amp;</span> <span class="n">stream</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">stream</span> <span class="o">&lt;&lt;</span> <span class="k">reinterpret_cast</span><span class="o">&lt;</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">type_info</span><span class="o">*&gt;</span><span class="p">(</span><span class="n">type</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">name</span><span class="p">();</span>
+    <span class="p">}</span>
 
-    static std::type_index type_index(type_id type) {
-        return std::type_index(*reinterpret_cast&lt;const std::type_info*&gt;(type));
-    }
+    <span class="k">static</span> <span class="n">std</span><span class="o">::</span><span class="n">type_index</span> <span class="nf">type_index</span><span class="p">(</span><span class="n">type_id</span> <span class="n">type</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="n">std</span><span class="o">::</span><span class="n">type_index</span><span class="p">(</span><span class="o">*</span><span class="k">reinterpret_cast</span><span class="o">&lt;</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">type_info</span><span class="o">*&gt;</span><span class="p">(</span><span class="n">type</span><span class="p">));</span>
+    <span class="p">}</span>
 
-    template&lt;typename D, typename B&gt;
-    static D dynamic_cast_ref(B&amp;&amp; obj) {
-        return dynamic_cast&lt;D&gt;(obj);
-    }
-};</code></pre>
+    <span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="nc">D</span><span class="p">,</span> <span class="k">typename</span> <span class="nc">B</span><span class="p">&gt;</span>
+    <span class="k">static</span> <span class="n">D</span> <span class="nf">dynamic_cast_ref</span><span class="p">(</span><span class="n">B</span><span class="o">&amp;&amp;</span> <span class="n">obj</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="k">dynamic_cast</span><span class="o">&lt;</span><span class="n">D</span><span class="o">&gt;</span><span class="p">(</span><span class="n">obj</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">};</span></code></pre>
 </div>
 </div>
 <div class="ulist">
@@ -960,24 +961,24 @@ open-methods.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="c++">struct Animal {
-    Animal(unsigned type) : type(type) {
-    }
+<pre class="rouge highlight"><code data-lang="c++"><span class="k">struct</span> <span class="nc">Animal</span> <span class="p">{</span>
+    <span class="n">Animal</span><span class="p">(</span><span class="kt">unsigned</span> <span class="n">type</span><span class="p">)</span> <span class="o">:</span> <span class="n">type</span><span class="p">(</span><span class="n">type</span><span class="p">)</span> <span class="p">{</span>
+    <span class="p">}</span>
 
-    virtual ~Animal() = default;
+    <span class="k">virtual</span> <span class="o">~</span><span class="n">Animal</span><span class="p">()</span> <span class="o">=</span> <span class="k">default</span><span class="p">;</span>
 
-    unsigned type;
-    static constexpr unsigned static_type = 1;
-};
+    <span class="kt">unsigned</span> <span class="n">type</span><span class="p">;</span>
+    <span class="k">static</span> <span class="k">constexpr</span> <span class="kt">unsigned</span> <span class="n">static_type</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+<span class="p">};</span>
 
-struct Cat : Animal {
-    Cat() : Animal(static_type) {
-    }
+<span class="k">struct</span> <span class="nc">Cat</span> <span class="o">:</span> <span class="n">Animal</span> <span class="p">{</span>
+    <span class="n">Cat</span><span class="p">()</span> <span class="o">:</span> <span class="n">Animal</span><span class="p">(</span><span class="n">static_type</span><span class="p">)</span> <span class="p">{</span>
+    <span class="p">}</span>
 
-    static constexpr unsigned static_type = 2;
-};
+    <span class="k">static</span> <span class="k">constexpr</span> <span class="kt">unsigned</span> <span class="n">static_type</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
+<span class="p">};</span>
 
-// ditto for Dog</code></pre>
+<span class="c1">// ditto for Dog</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -995,30 +996,30 @@ define the custom RTTI facet. We must <em>not</em> include
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="c++">#include &lt;boost/openmethod/policies/core.hpp&gt;
-#include &lt;boost/openmethod/policies/vptr_vector.hpp&gt;
+<pre class="rouge highlight"><code data-lang="c++"><span class="cp">#include</span> <span class="cpf">&lt;boost/openmethod/policies/core.hpp&gt;</span><span class="cp">
+#include</span> <span class="cpf">&lt;boost/openmethod/policies/vptr_vector.hpp&gt;</span><span class="cp">
+</span>
+<span class="k">namespace</span> <span class="n">bom</span> <span class="o">=</span> <span class="n">boost</span><span class="o">::</span><span class="n">openmethod</span><span class="p">;</span>
 
-namespace bom = boost::openmethod;
+<span class="k">struct</span> <span class="nc">custom_rtti</span> <span class="o">:</span> <span class="n">bom</span><span class="o">::</span><span class="n">policies</span><span class="o">::</span><span class="n">rtti</span> <span class="p">{</span>
+    <span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="nc">T</span><span class="p">&gt;</span>
+    <span class="k">static</span> <span class="n">bom</span><span class="o">::</span><span class="n">type_id</span> <span class="n">static_type</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="k">constexpr</span> <span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">is_base_of_v</span><span class="o">&lt;</span><span class="n">Animal</span><span class="p">,</span> <span class="n">T</span><span class="o">&gt;</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="n">T</span><span class="o">::</span><span class="n">static_type</span><span class="p">;</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
 
-struct custom_rtti : bom::policies::rtti {
-    template&lt;typename T&gt;
-    static bom::type_id static_type() {
-        if constexpr (std::is_base_of_v&lt;Animal, T&gt;) {
-            return T::static_type;
-        } else {
-            return 0;
-        }
-    }
-
-    template&lt;typename T&gt;
-    static bom::type_id dynamic_type(const T&amp; obj) {
-        if constexpr (std::is_base_of_v&lt;Animal, T&gt;) {
-            return obj.type;
-        } else {
-            return 0;
-        }
-    }
-};</code></pre>
+    <span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="nc">T</span><span class="p">&gt;</span>
+    <span class="k">static</span> <span class="n">bom</span><span class="o">::</span><span class="n">type_id</span> <span class="nf">dynamic_type</span><span class="p">(</span><span class="k">const</span> <span class="n">T</span><span class="o">&amp;</span> <span class="n">obj</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="k">constexpr</span> <span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">is_base_of_v</span><span class="o">&lt;</span><span class="n">Animal</span><span class="p">,</span> <span class="n">T</span><span class="o">&gt;</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="n">obj</span><span class="p">.</span><span class="n">type</span><span class="p">;</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">};</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1031,12 +1032,12 @@ so we will not keep the related facets. It does not support virtual inheritance.
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="c++">struct custom_policy
-    : bom::policies::basic_policy&lt;
-          custom_policy, custom_rtti,
-          bom::policies::vptr_vector&lt;custom_policy&gt;&gt; {};
+<pre class="rouge highlight"><code data-lang="c++"><span class="k">struct</span> <span class="nc">custom_policy</span>
+    <span class="o">:</span> <span class="n">bom</span><span class="o">::</span><span class="n">policies</span><span class="o">::</span><span class="n">basic_policy</span><span class="o">&lt;</span>
+          <span class="n">custom_policy</span><span class="p">,</span> <span class="n">custom_rtti</span><span class="p">,</span>
+          <span class="n">bom</span><span class="o">::</span><span class="n">policies</span><span class="o">::</span><span class="n">vptr_vector</span><span class="o">&lt;</span><span class="n">custom_policy</span><span class="o">&gt;&gt;</span> <span class="p">{};</span>
 
-#define BOOST_OPENMETHOD_DEFAULT_POLICY custom_policy</code></pre>
+<span class="cp">#define BOOST_OPENMETHOD_DEFAULT_POLICY custom_policy</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1044,35 +1045,35 @@ so we will not keep the related facets. It does not support virtual inheritance.
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="c++">#include &lt;boost/openmethod.hpp&gt;
-#include &lt;boost/openmethod/compiler.hpp&gt;
+<pre class="rouge highlight"><code data-lang="c++"><span class="cp">#include</span> <span class="cpf">&lt;boost/openmethod.hpp&gt;</span><span class="cp">
+#include</span> <span class="cpf">&lt;boost/openmethod/compiler.hpp&gt;</span><span class="cp">
+</span>
+<span class="n">BOOST_OPENMETHOD</span><span class="p">(</span><span class="n">poke</span><span class="p">,</span> <span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">ostream</span><span class="o">&amp;</span><span class="p">,</span> <span class="n">virtual_</span><span class="o">&lt;</span><span class="n">Animal</span><span class="o">&amp;&gt;</span><span class="p">),</span> <span class="kt">void</span><span class="p">);</span>
 
-BOOST_OPENMETHOD(poke, (std::ostream&amp;, virtual_&lt;Animal&amp;&gt;), void);
+<span class="n">BOOST_OPENMETHOD_OVERRIDE</span><span class="p">(</span><span class="n">poke</span><span class="p">,</span> <span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">ostream</span> <span class="o">&amp;</span> <span class="n">os</span><span class="p">,</span> <span class="n">Cat</span><span class="o">&amp;</span> <span class="n">cat</span><span class="p">),</span> <span class="kt">void</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">os</span> <span class="o">&lt;&lt;</span> <span class="s">"hiss"</span><span class="p">;</span>
+<span class="p">}</span>
 
-BOOST_OPENMETHOD_OVERRIDE(poke, (std::ostream &amp; os, Cat&amp; cat), void) {
-    os &lt;&lt; "hiss";
-}
+<span class="n">BOOST_OPENMETHOD_OVERRIDE</span><span class="p">(</span><span class="n">poke</span><span class="p">,</span> <span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">ostream</span> <span class="o">&amp;</span> <span class="n">os</span><span class="p">,</span> <span class="n">Dog</span><span class="o">&amp;</span> <span class="n">dog</span><span class="p">),</span> <span class="kt">void</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">os</span> <span class="o">&lt;&lt;</span> <span class="s">"bark"</span><span class="p">;</span>
+<span class="p">}</span>
 
-BOOST_OPENMETHOD_OVERRIDE(poke, (std::ostream &amp; os, Dog&amp; dog), void) {
-    os &lt;&lt; "bark";
-}
+<span class="n">BOOST_OPENMETHOD_CLASSES</span><span class="p">(</span><span class="n">Animal</span><span class="p">,</span> <span class="n">Cat</span><span class="p">,</span> <span class="n">Dog</span><span class="p">);</span>
 
-BOOST_OPENMETHOD_CLASSES(Animal, Cat, Dog);
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+    <span class="n">boost</span><span class="o">::</span><span class="n">openmethod</span><span class="o">::</span><span class="n">initialize</span><span class="p">();</span>
 
-int main() {
-    boost::openmethod::initialize();
+    <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">Animal</span><span class="o">&gt;</span> <span class="n">a</span><span class="p">(</span><span class="k">new</span> <span class="n">Cat</span><span class="p">);</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">Animal</span><span class="o">&gt;</span> <span class="n">b</span><span class="p">(</span><span class="k">new</span> <span class="n">Dog</span><span class="p">);</span>
 
-    std::unique_ptr&lt;Animal&gt; a(new Cat);
-    std::unique_ptr&lt;Animal&gt; b(new Dog);
+    <span class="n">poke</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="p">,</span> <span class="o">*</span><span class="n">a</span><span class="p">);</span> <span class="c1">// prints "hiss"</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
 
-    poke(std::cout, *a); // prints "hiss"
-    std::cout &lt;&lt; "\n";
+    <span class="n">poke</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="p">,</span> <span class="o">*</span><span class="n">b</span><span class="p">);</span> <span class="c1">// prints "bark"</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
 
-    poke(std::cout, *b); // prints "bark"
-    std::cout &lt;&lt; "\n";
-
-    return 0;
-}</code></pre>
+    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1096,58 +1097,58 @@ reading the type information until <code>initialize</code> is called.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="c++">struct custom_type_info {
-    static unsigned last;
-    unsigned id = ++last;
-};
+<pre class="rouge highlight"><code data-lang="c++"><span class="k">struct</span> <span class="nc">custom_type_info</span> <span class="p">{</span>
+    <span class="k">static</span> <span class="kt">unsigned</span> <span class="n">last</span><span class="p">;</span>
+    <span class="kt">unsigned</span> <span class="n">id</span> <span class="o">=</span> <span class="o">++</span><span class="n">last</span><span class="p">;</span>
+<span class="p">};</span>
 
-unsigned custom_type_info::last;
+<span class="kt">unsigned</span> <span class="n">custom_type_info</span><span class="o">::</span><span class="n">last</span><span class="p">;</span>
 
-struct Animal {
-    Animal() {
-        type = type_info.id;
-    }
+<span class="k">struct</span> <span class="nc">Animal</span> <span class="p">{</span>
+    <span class="n">Animal</span><span class="p">()</span> <span class="p">{</span>
+        <span class="n">type</span> <span class="o">=</span> <span class="n">type_info</span><span class="p">.</span><span class="n">id</span><span class="p">;</span>
+    <span class="p">}</span>
 
-    virtual ~Animal() = default;
+    <span class="k">virtual</span> <span class="o">~</span><span class="n">Animal</span><span class="p">()</span> <span class="o">=</span> <span class="k">default</span><span class="p">;</span>
 
-    virtual void* cast_impl(unsigned target) {
-        if (type_info.id == target) {
-            return this;
-        } else {
-            return nullptr;
-        }
-    }
+    <span class="k">virtual</span> <span class="kt">void</span><span class="o">*</span> <span class="nf">cast_impl</span><span class="p">(</span><span class="kt">unsigned</span> <span class="n">target</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">type_info</span><span class="p">.</span><span class="n">id</span> <span class="o">==</span> <span class="n">target</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="k">this</span><span class="p">;</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="nb">nullptr</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
 
-    template&lt;class Class&gt;
-    Class* cast() {
-        return reinterpret_cast&lt;Class*&gt;(cast_impl(Class::type_info.id));
-    }
+    <span class="k">template</span><span class="o">&lt;</span><span class="k">class</span> <span class="nc">Class</span><span class="p">&gt;</span>
+    <span class="n">Class</span><span class="o">*</span> <span class="nf">cast</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="k">reinterpret_cast</span><span class="o">&lt;</span><span class="n">Class</span><span class="o">*&gt;</span><span class="p">(</span><span class="n">cast_impl</span><span class="p">(</span><span class="n">Class</span><span class="o">::</span><span class="n">type_info</span><span class="p">.</span><span class="n">id</span><span class="p">));</span>
+    <span class="p">}</span>
 
-    static custom_type_info type_info;
-    unsigned type;
-};
+    <span class="k">static</span> <span class="n">custom_type_info</span> <span class="n">type_info</span><span class="p">;</span>
+    <span class="kt">unsigned</span> <span class="n">type</span><span class="p">;</span>
+<span class="p">};</span>
 
-custom_type_info Animal::type_info;
+<span class="n">custom_type_info</span> <span class="n">Animal</span><span class="o">::</span><span class="n">type_info</span><span class="p">;</span>
 
-struct Cat : virtual Animal {
-    Cat() {
-        type = type_info.id;
-    }
+<span class="k">struct</span> <span class="nc">Cat</span> <span class="o">:</span> <span class="k">virtual</span> <span class="n">Animal</span> <span class="p">{</span>
+    <span class="n">Cat</span><span class="p">()</span> <span class="p">{</span>
+        <span class="n">type</span> <span class="o">=</span> <span class="n">type_info</span><span class="p">.</span><span class="n">id</span><span class="p">;</span>
+    <span class="p">}</span>
 
-    virtual void* cast_impl(unsigned target) {
-        if (type_info.id == target) {
-            return this;
-        } else {
-            return Animal::cast_impl(target);
-        }
-    }
+    <span class="k">virtual</span> <span class="kt">void</span><span class="o">*</span> <span class="nf">cast_impl</span><span class="p">(</span><span class="kt">unsigned</span> <span class="n">target</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">type_info</span><span class="p">.</span><span class="n">id</span> <span class="o">==</span> <span class="n">target</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="k">this</span><span class="p">;</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="n">Animal</span><span class="o">::</span><span class="n">cast_impl</span><span class="p">(</span><span class="n">target</span><span class="p">);</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
 
-    static custom_type_info type_info;
-};
+    <span class="k">static</span> <span class="n">custom_type_info</span> <span class="n">type_info</span><span class="p">;</span>
+<span class="p">};</span>
 
-custom_type_info Cat::type_info;
+<span class="n">custom_type_info</span> <span class="n">Cat</span><span class="o">::</span><span class="n">type_info</span><span class="p">;</span>
 
-// ditto for Dog</code></pre>
+<span class="c1">// ditto for Dog</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1155,19 +1156,19 @@ custom_type_info Cat::type_info;
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="c++">struct custom_rtti : bom::policies::rtti {
-    // as before
+<pre class="rouge highlight"><code data-lang="c++"><span class="k">struct</span> <span class="nc">custom_rtti</span> <span class="o">:</span> <span class="n">bom</span><span class="o">::</span><span class="n">policies</span><span class="o">::</span><span class="n">rtti</span> <span class="p">{</span>
+    <span class="c1">// as before</span>
 
-    template&lt;typename Derived, typename Base&gt;
-    static Derived dynamic_cast_ref(Base&amp;&amp; obj) {
-        using base_type = std::remove_reference_t&lt;Base&gt;;
-        if constexpr (std::is_base_of_v&lt;Animal, base_type&gt;) {
-            return *obj.template cast&lt;std::remove_reference_t&lt;Derived&gt;&gt;();
-        } else {
-            abort(); // not supported
-        }
-    }
-};</code></pre>
+    <span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="nc">Derived</span><span class="p">,</span> <span class="k">typename</span> <span class="nc">Base</span><span class="p">&gt;</span>
+    <span class="k">static</span> <span class="n">Derived</span> <span class="n">dynamic_cast_ref</span><span class="p">(</span><span class="n">Base</span><span class="o">&amp;&amp;</span> <span class="n">obj</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">using</span> <span class="n">base_type</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">remove_reference_t</span><span class="o">&lt;</span><span class="n">Base</span><span class="o">&gt;</span><span class="p">;</span>
+        <span class="k">if</span> <span class="k">constexpr</span> <span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">is_base_of_v</span><span class="o">&lt;</span><span class="n">Animal</span><span class="p">,</span> <span class="n">base_type</span><span class="o">&gt;</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="o">*</span><span class="n">obj</span><span class="p">.</span><span class="k">template</span> <span class="n">cast</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">remove_reference_t</span><span class="o">&lt;</span><span class="n">Derived</span><span class="p">&gt;</span><span class="o">&gt;</span><span class="p">();</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="n">abort</span><span class="p">();</span> <span class="c1">// not supported</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">};</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1175,11 +1176,11 @@ custom_type_info Cat::type_info;
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="c++">struct custom_policy
-    : bom::policies::basic_policy&lt;
-          custom_policy, custom_rtti,
-          bom::policies::deferred_static_rtti, // &lt;-- additional facet
-          bom::policies::vptr_vector&lt;custom_policy&gt;&gt; {};</code></pre>
+<pre class="rouge highlight"><code data-lang="c++"><span class="k">struct</span> <span class="nc">custom_policy</span>
+    <span class="o">:</span> <span class="n">bom</span><span class="o">::</span><span class="n">policies</span><span class="o">::</span><span class="n">basic_policy</span><span class="o">&lt;</span>
+          <span class="n">custom_policy</span><span class="p">,</span> <span class="n">custom_rtti</span><span class="p">,</span>
+          <span class="n">bom</span><span class="o">::</span><span class="n">policies</span><span class="o">::</span><span class="n">deferred_static_rtti</span><span class="p">,</span> <span class="c1">// &lt;-- additional facet</span>
+          <span class="n">bom</span><span class="o">::</span><span class="n">policies</span><span class="o">::</span><span class="n">vptr_vector</span><span class="o">&lt;</span><span class="n">custom_policy</span><span class="o">&gt;&gt;</span> <span class="p">{};</span></code></pre>
 </div>
 </div>
 </div>
@@ -1252,6 +1253,10 @@ custom_type_info Cat::type_info;
 <h6 id="std_rtti">std_rtti</h6>
 
 </div>
+<div class="sect5">
+<h6 id="deferred_rtti_2">deferred_rtti</h6>
+
+</div>
 </div>
 </div>
 </div>
@@ -1260,7 +1265,7 @@ custom_type_info Cat::type_info;
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2024-10-13 15:25:04 -0400
+Last updated 2024-10-13 15:26:01 -0400
 </div>
 </div>
 </body>
