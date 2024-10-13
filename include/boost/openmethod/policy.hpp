@@ -13,19 +13,12 @@
 
 #include <boost/openmethod/policies/core.hpp>
 
-#include <boost/openmethod/policies/minimal_rtti.hpp>
 #include <boost/openmethod/policies/std_rtti.hpp>
 #include <boost/openmethod/policies/vptr_vector.hpp>
-#include <boost/openmethod/policies/vptr_map.hpp>
-#include <boost/openmethod/policies/basic_indirect_vptr.hpp>
 #include <boost/openmethod/policies/basic_error_output.hpp>
 #include <boost/openmethod/policies/basic_trace_output.hpp>
 #include <boost/openmethod/policies/fast_perfect_hash.hpp>
 #include <boost/openmethod/policies/vectored_error_handler.hpp>
-
-#ifndef BOOST_NO_EXCEPTIONS
-#include <boost/openmethod/policies/throw_error.hpp>
-#endif
 
 namespace boost {
 namespace openmethod {

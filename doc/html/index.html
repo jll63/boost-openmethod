@@ -52,6 +52,7 @@ function switch_style()
 <li><a href="#_policies_and_facets">Policies and Facets</a></li>
 <li><a href="#_error_handling">Error Handling</a></li>
 <li><a href="#_custom_rtti">Custom RTTI</a></li>
+<li><a href="#_deferred_rtti">Deferred RTTI</a></li>
 </ul>
 </li>
 <li><a href="#_reference">Reference</a>
@@ -61,22 +62,21 @@ function switch_style()
 <li><a href="#_macros">Macros</a>
 <ul class="sectlevel3">
 <li><a href="#_boost_openmethod">BOOST_OPENMETHOD</a></li>
-<li><a href="#_boost_openmethod_default_policy">BOOST_OPENMETHOD_DEFAULT_POLICY</a></li>
-<li><a href="#_boost_openmethod_classes">BOOST_OPENMETHOD_CLASSES</a></li>
-<li><a href="#_boost_openmethod_prefix">BOOST_OPENMETHOD_PREFIX</a></li>
 <li><a href="#_boost_openmethod_override">BOOST_OPENMETHOD_OVERRIDE</a></li>
+<li><a href="#_boost_openmethod_override_inline">BOOST_OPENMETHOD_OVERRIDE_INLINE</a></li>
 <li><a href="#_boost_openmethod_register">BOOST_OPENMETHOD_REGISTER</a></li>
-<li><a href="#_boost_openmethod_symbol">BOOST_OPENMETHOD_SYMBOL</a></li>
+<li><a href="#_boost_openmethod_name">BOOST_OPENMETHOD_NAME</a></li>
+<li><a href="#_boost_openmethod_classes">BOOST_OPENMETHOD_CLASSES</a></li>
+<li><a href="#_boost_openmethod_default_policy">BOOST_OPENMETHOD_DEFAULT_POLICY</a></li>
+<li><a href="#_virtual">virtual_</a></li>
+<li><a href="#_virtual_ptr_2">virtual_ptr</a></li>
 </ul>
 </li>
 <li><a href="#_core_api_2">Core API</a>
 <ul class="sectlevel3">
 <li><a href="#_method">method</a></li>
-<li><a href="#_methodoverride">method::override</a></li>
-<li><a href="#_methodoverride_fn">method::override_fn</a></li>
-<li><a href="#_virtual">virtual_</a></li>
-<li><a href="#_virtual_ptr_2">virtual_ptr</a></li>
-<li><a href="#_policiesbasic_policy">policies::basic_policy</a></li>
+<li><a href="#_policies">Policies</a></li>
+<li><a href="#_facets">Facets</a></li>
 </ul>
 </li>
 </ul>
@@ -935,7 +935,7 @@ int main() {
             trick(std::cout, *animal);
         } catch (bom::not_implemented_error) {
             std::cerr &lt;&lt; boost::core::demangle(typeid(*animal).name())
-                      &lt;&lt; "s cannot perform tricks\n";
+                      &lt;&lt; "s don't perform tricks\n";
         }
     }
 
@@ -945,25 +945,349 @@ int main() {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight nowrap"><code data-lang="c++"></code></pre>
+<pre class="rouge highlight nowrap"><code data-lang="console">spin
+Cats don't perform tricks
+spin</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>in two ways: by setting the function, using
-<code>set_error_handler</code>; or replacing the error facet. The library provides a
-<code>throw_error_handler</code> implementation, which throws the error object as an
-exception.</p>
+<p>The same result can be achieved by creating a policy that uses the <code>throw_error</code>
+facet implementaion.</p>
 </div>
-<div class="paragraph">
-<p>Error handling can be customized in two ways: by setting the function, using
-<code>set_error_handler</code>; or replacing the error facet. The library provides a
-<code>throw_error_handler</code> implementation, which throws the error object as an
-exception.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight nowrap"><code data-lang="c++">namespace bom = boost::openmethod;
+
+struct throwing_policy
+    : bom::policies::default_::rebind&lt;throwing_policy&gt;::replace&lt;
+          bom::policies::error_handler, bom::policies::throw_error&gt; {};
+
+BOOST_OPENMETHOD_CLASSES(Animal, Cat, Dog, throwing_policy);
+
+BOOST_OPENMETHOD(
+    trick, (std::ostream&amp;, virtual_&lt;Animal&amp;&gt;), void, throwing_policy);
+
+BOOST_OPENMETHOD_OVERRIDE(trick, (std::ostream &amp; os, Dog&amp; dog), void) {
+    os &lt;&lt; "spin\n";
+}
+
+int main() {
+    bom::initialize&lt;throwing_policy&gt;();
+
+    Cat felix;
+    Dog hector, snoopy;
+    std::vector&lt;Animal*&gt; animals = {&amp;hector, &amp;felix, &amp;snoopy};
+
+    for (auto animal : animals) {
+        try {
+            trick(std::cout, *animal);
+        } catch (bom::not_implemented_error) {
+            std::cerr &lt;&lt; boost::core::demangle(typeid(*animal).name())
+                      &lt;&lt; "s don't perform tricks\n";
+        }
+    }
+
+    return 0;
+}</code></pre>
+</div>
 </div>
 </div>
 <div class="sect2">
 <h3 id="_custom_rtti">Custom RTTI</h3>
+<div class="paragraph">
+<p>Stock policies use the <code>std_rtti</code> implementation of <code>rtti</code>. Here is its full
+source:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight nowrap"><code data-lang="c++">struct std_rtti : rtti {
+    template&lt;typename T&gt;
+    static type_id static_type() {
+        return reinterpret_cast&lt;type_id&gt;(&amp;typeid(T));
+    }
 
+    template&lt;typename T&gt;
+    static type_id dynamic_type(const T&amp; obj) {
+        return reinterpret_cast&lt;type_id&gt;(&amp;typeid(obj));
+    }
+
+    template&lt;class Stream&gt;
+    static void type_name(type_id type, Stream&amp; stream) {
+        stream &lt;&lt; reinterpret_cast&lt;const std::type_info*&gt;(type)-&gt;name();
+    }
+
+    static std::type_index type_index(type_id type) {
+        return std::type_index(*reinterpret_cast&lt;const std::type_info*&gt;(type));
+    }
+
+    template&lt;typename D, typename B&gt;
+    static D dynamic_cast_ref(B&amp;&amp; obj) {
+        return dynamic_cast&lt;D&gt;(obj);
+    }
+};</code></pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>static_type</code> is used by class registration, by <code>virtual_ptr&#8217;s "final"
+constructs, and to format error and trace messages. `T</code> is not restricted to
+the classes that appear as virtual parameters. This function is required.</p>
+</li>
+<li>
+<p><code>dynamic_type</code> is used to locate the v-table for an object. This function is
+required, unless only the <code>virtual_ptr</code> "final" constructs are used.</p>
+</li>
+<li>
+<p><code>type_name</code> writes a representation of <code>type</code> to <code>stream</code>. It is used to format
+error and trace messages. <code>Stream</code> is a lighweight version of <code>std::ostream</code>
+with reduced functionality. It only supports insertion of <code>const char*</code>,
+<code>std::string_view</code>, pointers and <code>std::size_t</code>. This function is optional;
+if not provided, "type_id(<em>type</em>)" is written.</p>
+</li>
+<li>
+<p><code>type_index</code> returns an object that <em>uniquely</em> identifies a class. Some forms
+of RTTI (most notably, C++'S <code>typeid</code> operator) do not guarantee that the
+type information object for a class is unique within the same program. This
+function is optional; if not provided, <code>type</code> is assumed to be unique, and
+used as is.</p>
+</li>
+<li>
+<p><code>dynamic_cast_ref`casts `obj</code> to class <code>D</code>. <code>B&amp;&amp;</code> is either a lvalue reference
+(possibly cv-qualified) or a rvalue reference. <code>D</code> has the same reference
+category (and cv-qualifier if applicable) as <code>B</code>. This function is required
+only if virtual inheritance is used in the class hierarchies involved with
+open-methods.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Consider a custom RTTI implementation:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight nowrap"><code data-lang="c++">struct Animal {
+    Animal(unsigned type) : type(type) {
+    }
+
+    virtual ~Animal() = default;
+
+    unsigned type;
+    static constexpr unsigned static_type = 1;
+};
+
+struct Cat : Animal {
+    Cat() : Animal(static_type) {
+    }
+
+    static constexpr unsigned static_type = 2;
+};
+
+// ditto for Dog</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This scheme has an interesting property: its type ids are monotonically
+allocated in a small, dense range. Thus, we don&#8217;t need to hash them. We can use
+them as indexes in the table of vptrs.</p>
+</div>
+<div class="paragraph">
+<p>This time we are going to replace the default policy globally. First we need to
+define the custom RTTI facet. We must <em>not</em> include
+<code>&lt;boost/openmethod/core.hpp&gt;</code> or any header that includes it yet.</p>
+</div>
+<div class="paragraph">
+<p>Here is the facet implementation:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight nowrap"><code data-lang="c++">#include &lt;boost/openmethod/policies/core.hpp&gt;
+#include &lt;boost/openmethod/policies/vptr_vector.hpp&gt;
+
+namespace bom = boost::openmethod;
+
+struct custom_rtti : bom::policies::rtti {
+    template&lt;typename T&gt;
+    static bom::type_id static_type() {
+        if constexpr (std::is_base_of_v&lt;Animal, T&gt;) {
+            return T::static_type;
+        } else {
+            return 0;
+        }
+    }
+
+    template&lt;typename T&gt;
+    static bom::type_id dynamic_type(const T&amp; obj) {
+        if constexpr (std::is_base_of_v&lt;Animal, T&gt;) {
+            return obj.type;
+        } else {
+            return 0;
+        }
+    }
+};</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This facet is quite minimal. It would not produce good error or trace messages,
+so we will not keep the related facets. It does not support virtual inheritance.</p>
+</div>
+<div class="paragraph">
+<p>This time we will create a policy from scratch. For that we use the
+<code>basic_policy</code> CRTP template:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight nowrap"><code data-lang="c++">struct custom_policy
+    : bom::policies::basic_policy&lt;
+          custom_policy, custom_rtti,
+          bom::policies::vptr_vector&lt;custom_policy&gt;&gt; {};
+
+#define BOOST_OPENMETHOD_DEFAULT_POLICY custom_policy</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now we can include the other headers:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight nowrap"><code data-lang="c++">#include &lt;boost/openmethod.hpp&gt;
+#include &lt;boost/openmethod/compiler.hpp&gt;
+
+BOOST_OPENMETHOD(poke, (std::ostream&amp;, virtual_&lt;Animal&amp;&gt;), void);
+
+BOOST_OPENMETHOD_OVERRIDE(poke, (std::ostream &amp; os, Cat&amp; cat), void) {
+    os &lt;&lt; "hiss";
+}
+
+BOOST_OPENMETHOD_OVERRIDE(poke, (std::ostream &amp; os, Dog&amp; dog), void) {
+    os &lt;&lt; "bark";
+}
+
+BOOST_OPENMETHOD_CLASSES(Animal, Cat, Dog);
+
+int main() {
+    boost::openmethod::initialize();
+
+    std::unique_ptr&lt;Animal&gt; a(new Cat);
+    std::unique_ptr&lt;Animal&gt; b(new Dog);
+
+    poke(std::cout, *a); // prints "hiss"
+    std::cout &lt;&lt; "\n";
+
+    poke(std::cout, *b); // prints "bark"
+    std::cout &lt;&lt; "\n";
+
+    return 0;
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This programs compiles even if standard RTTI is disabled.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_deferred_rtti">Deferred RTTI</h3>
+<div class="paragraph">
+<p>The RTTI system assigns the types id statically. It is more common to allocate
+them using a global counter, manipulated by static constructors. This is a
+problem, because <code>static_type</code> is used by class registration. It may read the
+custom type ids <em>before</em> they are have been initialized.</p>
+</div>
+<div class="paragraph">
+<p>The solution is to add the <code>deferred_static_rtti</code> to the policy; it defers
+reading the type information until <code>initialize</code> is called.</p>
+</div>
+<div class="paragraph">
+<p>This time let&#8217;s support virtual inheritance as well. First the domain classes:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight nowrap"><code data-lang="c++">struct custom_type_info {
+    static unsigned last;
+    unsigned id = ++last;
+};
+
+unsigned custom_type_info::last;
+
+struct Animal {
+    Animal() {
+        type = type_info.id;
+    }
+
+    virtual ~Animal() = default;
+
+    virtual void* cast_impl(unsigned target) {
+        if (type_info.id == target) {
+            return this;
+        } else {
+            return nullptr;
+        }
+    }
+
+    template&lt;class Class&gt;
+    Class* cast() {
+        return reinterpret_cast&lt;Class*&gt;(cast_impl(Class::type_info.id));
+    }
+
+    static custom_type_info type_info;
+    unsigned type;
+};
+
+custom_type_info Animal::type_info;
+
+struct Cat : virtual Animal {
+    Cat() {
+        type = type_info.id;
+    }
+
+    virtual void* cast_impl(unsigned target) {
+        if (type_info.id == target) {
+            return this;
+        } else {
+            return Animal::cast_impl(target);
+        }
+    }
+
+    static custom_type_info type_info;
+};
+
+custom_type_info Cat::type_info;
+
+// ditto for Dog</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The rtti facet is the same, with one more function:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight nowrap"><code data-lang="c++">struct custom_rtti : bom::policies::rtti {
+    // as before
+
+    template&lt;typename Derived, typename Base&gt;
+    static Derived dynamic_cast_ref(Base&amp;&amp; obj) {
+        using base_type = std::remove_reference_t&lt;Base&gt;;
+        if constexpr (std::is_base_of_v&lt;Animal, base_type&gt;) {
+            return *obj.template cast&lt;std::remove_reference_t&lt;Derived&gt;&gt;();
+        } else {
+            abort(); // not supported
+        }
+    }
+};</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Finally, the policy contains an additional facet:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight nowrap"><code data-lang="c++">struct custom_policy
+    : bom::policies::basic_policy&lt;
+          custom_policy, custom_rtti,
+          bom::policies::deferred_static_rtti, // &lt;-- additional facet
+          bom::policies::vptr_vector&lt;custom_policy&gt;&gt; {};</code></pre>
+</div>
+</div>
 </div>
 </div>
 </div>
@@ -985,19 +1309,11 @@ exception.</p>
 
 </div>
 <div class="sect3">
-<h4 id="_boost_openmethod_default_policy">BOOST_OPENMETHOD_DEFAULT_POLICY</h4>
-
-</div>
-<div class="sect3">
-<h4 id="_boost_openmethod_classes">BOOST_OPENMETHOD_CLASSES</h4>
-
-</div>
-<div class="sect3">
-<h4 id="_boost_openmethod_prefix">BOOST_OPENMETHOD_PREFIX</h4>
-
-</div>
-<div class="sect3">
 <h4 id="_boost_openmethod_override">BOOST_OPENMETHOD_OVERRIDE</h4>
+
+</div>
+<div class="sect3">
+<h4 id="_boost_openmethod_override_inline">BOOST_OPENMETHOD_OVERRIDE_INLINE</h4>
 
 </div>
 <div class="sect3">
@@ -1005,22 +1321,15 @@ exception.</p>
 
 </div>
 <div class="sect3">
-<h4 id="_boost_openmethod_symbol">BOOST_OPENMETHOD_SYMBOL</h4>
-
-</div>
-</div>
-<div class="sect2">
-<h3 id="_core_api_2">Core API</h3>
-<div class="sect3">
-<h4 id="_method">method</h4>
+<h4 id="_boost_openmethod_name">BOOST_OPENMETHOD_NAME</h4>
 
 </div>
 <div class="sect3">
-<h4 id="_methodoverride">method::override</h4>
+<h4 id="_boost_openmethod_classes">BOOST_OPENMETHOD_CLASSES</h4>
 
 </div>
 <div class="sect3">
-<h4 id="_methodoverride_fn">method::override_fn</h4>
+<h4 id="_boost_openmethod_default_policy">BOOST_OPENMETHOD_DEFAULT_POLICY</h4>
 
 </div>
 <div class="sect3">
@@ -1031,8 +1340,28 @@ exception.</p>
 <h4 id="_virtual_ptr_2">virtual_ptr</h4>
 
 </div>
+</div>
+<div class="sect2">
+<h3 id="_core_api_2">Core API</h3>
 <div class="sect3">
-<h4 id="_policiesbasic_policy">policies::basic_policy</h4>
+<h4 id="_method">method</h4>
+
+</div>
+<div class="sect3">
+<h4 id="_policies">Policies</h4>
+<div class="sect4">
+<h5 id="_basic_policy">basic_policy</h5>
+
+</div>
+</div>
+<div class="sect3">
+<h4 id="_facets">Facets</h4>
+<div class="sect4">
+<h5 id="_rtti">rtti</h5>
+
+</div>
+<div class="sect4">
+<h5 id="_policiesbasic_policy">policies::basic_policy</h5>
 <div class="literalblock">
 <div class="content">
 <pre class="nowrap">Facets are similar to C++20 concepts: they indicate that certain
@@ -1116,6 +1445,7 @@ concept in C++20.</pre>
 </tr>
 </tbody>
 </table>
+</div>
 </div>
 </div>
 </div>

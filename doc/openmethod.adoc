@@ -667,7 +667,7 @@ int main() {
             trick(std::cout, *animal);
         } catch (bom::not_implemented_error) {
             std::cerr << boost::core::demangle(typeid(*animal).name())
-                      << "s cannot perform tricks\n";
+                      << "s don't perform tricks\n";
         }
     }
 
@@ -675,26 +675,326 @@ int main() {
 }
 ----
 
+[source,console]
+----
+spin
+Cats don't perform tricks
+spin
+----
+
+The same result can be achieved by creating a policy that uses the `throw_error`
+facet implementaion.
+
 [source,c++]
 ----
+namespace bom = boost::openmethod;
+
+struct throwing_policy
+    : bom::policies::default_::rebind<throwing_policy>::replace<
+          bom::policies::error_handler, bom::policies::throw_error> {};
+
+BOOST_OPENMETHOD_CLASSES(Animal, Cat, Dog, throwing_policy);
+
+BOOST_OPENMETHOD(
+    trick, (std::ostream&, virtual_<Animal&>), void, throwing_policy);
+
+BOOST_OPENMETHOD_OVERRIDE(trick, (std::ostream & os, Dog& dog), void) {
+    os << "spin\n";
+}
+
+int main() {
+    bom::initialize<throwing_policy>();
+
+    Cat felix;
+    Dog hector, snoopy;
+    std::vector<Animal*> animals = {&hector, &felix, &snoopy};
+
+    for (auto animal : animals) {
+        try {
+            trick(std::cout, *animal);
+        } catch (bom::not_implemented_error) {
+            std::cerr << boost::core::demangle(typeid(*animal).name())
+                      << "s don't perform tricks\n";
+        }
+    }
+
+    return 0;
+}
+----
+
+=== Custom RTTI
+
+Stock policies use the `std_rtti` implementation of `rtti`. Here is its full
+source:
+
+[source,c++]
+----
+struct std_rtti : rtti {
+    template<typename T>
+    static type_id static_type() {
+        return reinterpret_cast<type_id>(&typeid(T));
+    }
+
+    template<typename T>
+    static type_id dynamic_type(const T& obj) {
+        return reinterpret_cast<type_id>(&typeid(obj));
+    }
+
+    template<class Stream>
+    static void type_name(type_id type, Stream& stream) {
+        stream << reinterpret_cast<const std::type_info*>(type)->name();
+    }
+
+    static std::type_index type_index(type_id type) {
+        return std::type_index(*reinterpret_cast<const std::type_info*>(type));
+    }
+
+    template<typename D, typename B>
+    static D dynamic_cast_ref(B&& obj) {
+        return dynamic_cast<D>(obj);
+    }
+};
+----
+
+* `static_type` is used by class registration, by `virtual_ptr`'s "final"
+    constructs, and to format error and trace messages. `T` is not restricted to
+    the classes that appear as virtual parameters. This function is required.
+
+* `dynamic_type` is used to locate the v-table for an object. This function is
+    required, unless only the `virtual_ptr` "final" constructs are used.
+
+* `type_name` writes a representation of `type` to `stream`. It is used to format
+    error and trace messages. `Stream` is a lighweight version of `std::ostream`
+    with reduced functionality. It only supports insertion of `const char*`,
+    `std::string_view`, pointers and `std::size_t`. This function is optional;
+    if not provided, "type_id(_type_)" is written.
+
+* `type_index` returns an object that _uniquely_ identifies a class. Some forms
+    of RTTI (most notably, C++'S `typeid` operator) do not guarantee that the
+    type information object for a class is unique within the same program. This
+    function is optional; if not provided, `type` is assumed to be unique, and
+    used as is.
+
+* `dynamic_cast_ref`casts `obj` to class `D`. `B&&` is either a lvalue reference
+    (possibly cv-qualified) or a rvalue reference. `D` has the same reference
+    category (and cv-qualifier if applicable) as `B`. This function is required
+    only if virtual inheritance is used in the class hierarchies involved with
+    open-methods.
+
+Consider a custom RTTI implementation:
+
+[source,c++]
+----
+struct Animal {
+    Animal(unsigned type) : type(type) {
+    }
+
+    virtual ~Animal() = default;
+
+    unsigned type;
+    static constexpr unsigned static_type = 1;
+};
+
+struct Cat : Animal {
+    Cat() : Animal(static_type) {
+    }
+
+    static constexpr unsigned static_type = 2;
+};
+
+// ditto for Dog
+----
+
+This scheme has an interesting property: its type ids are monotonically
+allocated in a small, dense range. Thus, we don't need to hash them. We can use
+them as indexes in the table of vptrs.
+
+This time we are going to replace the default policy globally. First we need to
+define the custom RTTI facet. We must _not_ include
+`<boost/openmethod/core.hpp>` or any header that includes it yet.
+
+Here is the facet implementation:
+
+[source,c++]
+----
+#include <boost/openmethod/policies/core.hpp>
+#include <boost/openmethod/policies/vptr_vector.hpp>
+
+namespace bom = boost::openmethod;
+
+struct custom_rtti : bom::policies::rtti {
+    template<typename T>
+    static bom::type_id static_type() {
+        if constexpr (std::is_base_of_v<Animal, T>) {
+            return T::static_type;
+        } else {
+            return 0;
+        }
+    }
+
+    template<typename T>
+    static bom::type_id dynamic_type(const T& obj) {
+        if constexpr (std::is_base_of_v<Animal, T>) {
+            return obj.type;
+        } else {
+            return 0;
+        }
+    }
+};
+----
+
+This facet is quite minimal. It would not produce good error or trace messages,
+so we will not keep the related facets. It does not support virtual inheritance.
+
+This time we will create a policy from scratch. For that we use the
+`basic_policy` CRTP template:
+
+[source,c++]
+----
+
+struct custom_policy
+    : bom::policies::basic_policy<
+          custom_policy, custom_rtti,
+          bom::policies::vptr_vector<custom_policy>> {};
+
+#define BOOST_OPENMETHOD_DEFAULT_POLICY custom_policy
+----
+
+Now we can include the other headers:
+
+[source,c++]
+----
+#include <boost/openmethod.hpp>
+#include <boost/openmethod/compiler.hpp>
+
+BOOST_OPENMETHOD(poke, (std::ostream&, virtual_<Animal&>), void);
+
+BOOST_OPENMETHOD_OVERRIDE(poke, (std::ostream & os, Cat& cat), void) {
+    os << "hiss";
+}
+
+BOOST_OPENMETHOD_OVERRIDE(poke, (std::ostream & os, Dog& dog), void) {
+    os << "bark";
+}
+
+BOOST_OPENMETHOD_CLASSES(Animal, Cat, Dog);
+
+int main() {
+    boost::openmethod::initialize();
+
+    std::unique_ptr<Animal> a(new Cat);
+    std::unique_ptr<Animal> b(new Dog);
+
+    poke(std::cout, *a); // prints "hiss"
+    std::cout << "\n";
+
+    poke(std::cout, *b); // prints "bark"
+    std::cout << "\n";
+
+    return 0;
+}
+----
+
+This programs compiles even if standard RTTI is disabled.
+
+=== Deferred RTTI
+
+The RTTI system assigns the types id statically. It is more common to allocate
+them using a global counter, manipulated by static constructors. This is a
+problem, because `static_type` is used by class registration. It may read the
+custom type ids _before_ they are have been initialized.
+
+The solution is to add the `deferred_static_rtti` to the policy; it defers
+reading the type information until `initialize` is called.
+
+This time let's support virtual inheritance as well. First the domain classes:
+
+[source,c++]
+----
+struct custom_type_info {
+    static unsigned last;
+    unsigned id = ++last;
+};
+
+unsigned custom_type_info::last;
+
+struct Animal {
+    Animal() {
+        type = type_info.id;
+    }
+
+    virtual ~Animal() = default;
+
+    virtual void* cast_impl(unsigned target) {
+        if (type_info.id == target) {
+            return this;
+        } else {
+            return nullptr;
+        }
+    }
+
+    template<class Class>
+    Class* cast() {
+        return reinterpret_cast<Class*>(cast_impl(Class::type_info.id));
+    }
+
+    static custom_type_info type_info;
+    unsigned type;
+};
+
+custom_type_info Animal::type_info;
+
+struct Cat : virtual Animal {
+    Cat() {
+        type = type_info.id;
+    }
+
+    virtual void* cast_impl(unsigned target) {
+        if (type_info.id == target) {
+            return this;
+        } else {
+            return Animal::cast_impl(target);
+        }
+    }
+
+    static custom_type_info type_info;
+};
+
+custom_type_info Cat::type_info;
+
+// ditto for Dog
 ----
 
 
-in two ways: by setting the function, using
-`set_error_handler`; or replacing the error facet. The library provides a
-`throw_error_handler` implementation, which throws the error object as an
-exception.
+The rtti facet is the same, with one more function:
 
+[source,c++]
+----
+struct custom_rtti : bom::policies::rtti {
+    // as before
 
+    template<typename Derived, typename Base>
+    static Derived dynamic_cast_ref(Base&& obj) {
+        using base_type = std::remove_reference_t<Base>;
+        if constexpr (std::is_base_of_v<Animal, base_type>) {
+            return *obj.template cast<std::remove_reference_t<Derived>>();
+        } else {
+            abort(); // not supported
+        }
+    }
+};
+----
 
-Error handling can be customized in two ways: by setting the function, using
-`set_error_handler`; or replacing the error facet. The library provides a
-`throw_error_handler` implementation, which throws the error object as an
-exception.
+Finally, the policy contains an additional facet:
 
-
-
-=== Custom RTTI
+[source,c++]
+----
+struct custom_policy
+    : bom::policies::basic_policy<
+          custom_policy, custom_rtti,
+          bom::policies::deferred_static_rtti, // <-- additional facet
+          bom::policies::vptr_vector<custom_policy>> {};
+----
 
 == Reference
 
@@ -706,31 +1006,35 @@ exception.
 
 ==== BOOST_OPENMETHOD
 
-==== BOOST_OPENMETHOD_DEFAULT_POLICY
-
-==== BOOST_OPENMETHOD_CLASSES
-
-==== BOOST_OPENMETHOD_PREFIX
-
 ==== BOOST_OPENMETHOD_OVERRIDE
+
+==== BOOST_OPENMETHOD_OVERRIDE_INLINE
 
 ==== BOOST_OPENMETHOD_REGISTER
 
-==== BOOST_OPENMETHOD_SYMBOL
+==== BOOST_OPENMETHOD_NAME
 
-=== Core API
+==== BOOST_OPENMETHOD_CLASSES
 
-==== method
-
-==== method::override
-
-==== method::override_fn
+==== BOOST_OPENMETHOD_DEFAULT_POLICY
 
 ==== virtual_
 
 ==== virtual_ptr
 
-==== policies::basic_policy
+=== Core API
+
+==== method
+
+==== Policies
+
+===== basic_policy
+
+==== Facets
+
+===== rtti
+
+===== policies::basic_policy
 
 
  Facets are similar to C++20 concepts: they indicate that certain

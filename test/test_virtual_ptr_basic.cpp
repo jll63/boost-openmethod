@@ -21,8 +21,6 @@ using std::cout;
 using namespace boost::openmethod;
 using namespace boost::openmethod::detail;
 
-auto debug_handler = &policies::default_::error_handler;
-
 struct base {
     virtual ~base() {
     }
