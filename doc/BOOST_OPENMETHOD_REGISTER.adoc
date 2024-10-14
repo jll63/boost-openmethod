@@ -1,0 +1,19 @@
+
+[#BOOST_OPENMETHOD_REGISTER]
+### BOOST_OPENMETHOD_REGISTER
+
+```c++
+BOOST_OPENMETHOD_REGISTER(TYPE)
+```
+
+*Macro Parameters*
+
+[cols="1,1"]
+|===
+
+|_TYPE_
+| A type name.
+
+|===
+
+Create a static instance of `TYPE`, using a unique generated name.

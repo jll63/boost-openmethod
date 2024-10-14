@@ -10,7 +10,6 @@
 #include <random>
 
 #include <boost/openmethod/policies/core.hpp>
-#include <boost/openmethod/detail/empty_base.hpp>
 
 namespace boost {
 namespace openmethod {

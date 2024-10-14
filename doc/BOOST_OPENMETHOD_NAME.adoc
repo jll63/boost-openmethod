@@ -1,0 +1,20 @@
+
+[#BOOST_OPENMETHOD_NAME]
+### BOOST_OPENMETHOD_NAME
+
+```c++
+#define BOOST_OPENMETHOD_NAME(NAME) boost_openmethod_##NAME
+```
+
+*Macro Parameters*
+
+[cols="1,1"]
+|===
+
+|_NAME_
+| The name of a method.
+
+|===
+
+`BOOST_OPENMETHOD_NAME` is used by the macro API to generate the `Name`
+parameter of a `method`.

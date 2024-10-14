@@ -15,6 +15,7 @@
 #include <boost/preprocessor/tuple/size.hpp>
 
 #define BOOST_OPENMETHOD_NAME(NAME) boost_openmethod_##NAME
+
 #define BOOST_OPENMETHOD_OVERRIDERS(NAME)                                      \
     BOOST_PP_CAT(BOOST_OPENMETHOD_NAME(NAME), _overriders)
 
@@ -34,7 +35,7 @@
 #define BOOST_OPENMETHOD(NAME, ARGS, ...)                                      \
     struct BOOST_OPENMETHOD_NAME(NAME);                                        \
     ::boost::openmethod::method<BOOST_OPENMETHOD_NAME(NAME) ARGS, __VA_ARGS__> \
-        BOOST_PP_CAT(BOOST_OPENMETHOD_NAME(NAME), guide_)(BOOST_PP_REPEAT(     \
+        BOOST_PP_CAT(BOOST_OPENMETHOD_NAME(NAME), _guide)(BOOST_PP_REPEAT(     \
             BOOST_PP_TUPLE_SIZE(ARGS), BOOST_OPENMETHOD_DETAIL_PLIST, ARGS));  \
     inline decltype(auto) NAME(BOOST_PP_REPEAT(                                \
         BOOST_PP_TUPLE_SIZE(ARGS), BOOST_OPENMETHOD_DETAIL_PLIST, ARGS)) {     \
@@ -50,7 +51,7 @@
     struct boost_openmethod_detail_locate_method_aux;                          \
     template<typename... A>                                                    \
     struct boost_openmethod_detail_locate_method_aux<void(A...)> {             \
-        using type = decltype(NAME##guide_(std::declval<A>()...));             \
+        using type = decltype(NAME##_guide(std::declval<A>()...));             \
     };                                                                         \
     using method_type =                                                        \
         boost_openmethod_detail_locate_method_aux<void ARGS>::type
@@ -58,7 +59,7 @@
 #define BOOST_OPENMETHOD_DETAIL_RETURN_TYPE(...)                               \
     boost::mp11::mp_back<boost::mp11::mp_list<__VA_ARGS__>>
 
-#define BOOST_OPENMETHOD_DETAIL_DEFINE(INLINE, OVERRIDERS, NAME, ARGS, ...)    \
+#define BOOST_OPENMETHOD_DETAIL_OVERRIDE(INLINE, OVERRIDERS, NAME, ARGS, ...)  \
     template<typename...>                                                      \
     struct OVERRIDERS;                                                         \
     template<>                                                                 \
@@ -82,21 +83,18 @@
         OVERRIDERS<BOOST_OPENMETHOD_DETAIL_RETURN_TYPE(__VA_ARGS__) ARGS>::fn  \
             ARGS->boost::mp11::mp_back<boost::mp11::mp_list<__VA_ARGS__>>
 
-#define BOOST_OPENMETHOD_OVERRIDE_INLINE(NAME, ARGS, ...)                      \
-    BOOST_OPENMETHOD_DETAIL_DEFINE(                                            \
+#define BOOST_OPENMETHOD_INLINE_OVERRIDE(NAME, ARGS, ...)                      \
+    BOOST_OPENMETHOD_DETAIL_OVERRIDE(                                          \
         inline, BOOST_OPENMETHOD_OVERRIDERS(NAME),                             \
         BOOST_OPENMETHOD_NAME(NAME), ARGS, __VA_ARGS__)
 
 #define BOOST_OPENMETHOD_OVERRIDE(NAME, ARGS, ...)                             \
-    BOOST_OPENMETHOD_DETAIL_DEFINE(                                            \
+    BOOST_OPENMETHOD_DETAIL_OVERRIDE(                                          \
         , BOOST_OPENMETHOD_OVERRIDERS(NAME), BOOST_OPENMETHOD_NAME(NAME),      \
         ARGS, __VA_ARGS__)
 
 #define BOOST_OPENMETHOD_CLASSES(...)                                          \
     static ::boost::openmethod::use_classes<__VA_ARGS__>                       \
-        BOOST_OPENMETHOD_GENSYM;
-
-#define BOOST_OPENMETHOD_CLASS(NAME, ARGS, ...)                                \
-    ::boost::openmethod::method<BOOST_OPENMETHOD_NAME(NAME) ARGS, __VA_ARGS__>
+        BOOST_OPENMETHOD_GENSYM
 
 #endif

@@ -2,7 +2,7 @@
 # OpenMethod: an emulation of N2216
 Jean-Louis Leroy
 :toc: left
-:toclevels: 5
+:toclevels: 3
 :idprefix:
 :listing-caption: Code Example
 :table-caption: Illustration

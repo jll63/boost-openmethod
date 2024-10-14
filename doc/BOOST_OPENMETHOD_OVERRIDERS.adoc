@@ -1,0 +1,11 @@
+
+[#BOOST_OPENMETHOD_OVERRIDERS]
+### BOOST_OPENMETHOD_OVERRIDERS
+
+```c++
+#define BOOST_OPENMETHOD_OVERRIDERS(NAME)                                      \
+    BOOST_PP_CAT(BOOST_OPENMETHOD_NAME(NAME), _overriders)
+```
+
+`BOOST_OPENMETHOD_OVERRIDERS` is used by the macro API to generate the name of
+the class template that contains the overriders for the method named `NAME`.

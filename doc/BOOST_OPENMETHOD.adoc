@@ -1,0 +1,49 @@
+
+[#BOOST_OPENMETHOD]
+### BOOST_OPENMETHOD
+
+```c++
+BOOST_OPENMETHOD(NAME, (PARAMETERS...), RETURN_TYPE [, POLICY])
+```
+
+*Macro Parameters*
+
+[cols="1,1"]
+|===
+
+|_NAME_
+| The name of the method.
+
+|_PARAMETERS_
+| The formal parameters of the method, consisting of a list of comma-separated
+  *types*. At least one parameter decorated with `virtual_` or `virtual_ptr` is
+  required.
+
+|_RETURN_TYPE_
+| The return type of the method.
+
+|_POLICY_
+| An optional policy. If not specified, `BOOST_OPENMETHOD_DEFAULT_POLICY` is used.
+
+|===
+
+Create an open-method.
+
+The macro expands to several constructs, the most important of which is an
+inline function called `NAME`, with a formal parameter list that consists of the
+types listed in `_PARAMETERS_`, stripped from any `virtual_` decorator
+(`virtual_ptr`{empty}s are preserved), and returning a `RETURN_TYPE`.
+
+The function creates additional entities:
+
+* A `struct` forward declaration that acts as the method's identifier:
+```c++
+struct BOOST_OPENMETHOD_NAME(NAME);
+```
+
+* A guide function used to match overriders with the method:
+```c++
+auto BOOST_OPENMETHOD_NAME(NAME)_guide(...)
+    -> ::boost::openmethod::method<
+        BOOST_OPENMETHOD_NAME(NAME)(PARAMETERS...), RETURN_TYPE [, POLICY]>;
+```

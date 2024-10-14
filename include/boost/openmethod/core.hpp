@@ -566,12 +566,14 @@ struct has_static_offsets<
 } // namespace detail
 
 template<
-    typename Method, typename Return,
+    typename Method, typename ReturnType,
     class Policy = BOOST_OPENMETHOD_DEFAULT_POLICY>
-struct method;
+class method;
 
-template<typename Name, typename Return, typename... Parameters, class Policy>
-class method<Name(Parameters...), Return, Policy> : public detail::method_info {
+template<
+    typename Name, typename ReturnType, typename... Parameters, class Policy>
+class method<Name(Parameters...), ReturnType, Policy>
+    : public detail::method_info {
     // Aliases used in implementation only. Everything extracted from template
     // arguments is capitalized like the arguments themselves.
     using DeclaredParameters = detail::types<Parameters...>;
@@ -579,9 +581,9 @@ class method<Name(Parameters...), Return, Policy> : public detail::method_info {
         boost::mp11::mp_transform<detail::remove_virtual, DeclaredParameters>;
     using VirtualParameters =
         typename detail::polymorphic_types<DeclaredParameters>;
-    using Signature = auto(Parameters...) -> Return;
-    using FunctionPointer = auto (*)(detail::remove_virtual<Parameters>...)
-        -> Return;
+    using Signature = auto(Parameters...) -> ReturnType;
+    using FunctionPointer = auto(*)(detail::remove_virtual<Parameters>...)
+                                -> ReturnType;
     static constexpr auto Arity = boost::mp11::mp_count_if<
         detail::types<Parameters...>, detail::is_virtual>::value;
     static_assert(Arity > 0, "method must have at least one virtual argument");
@@ -623,7 +625,7 @@ class method<Name(Parameters...), Return, Policy> : public detail::method_info {
 
     static BOOST_NORETURN auto
     not_implemented_handler(detail::remove_virtual<Parameters>... args)
-        -> Return;
+        -> ReturnType;
 
     template<auto, typename>
     struct thunk;
@@ -633,8 +635,8 @@ class method<Name(Parameters...), Return, Policy> : public detail::method_info {
   public:
     // Public aliases.
     using name_type = Name;
-    using return_type = Return;
-    using next_type = Return (*)(detail::remove_virtual<Parameters>...);
+    using return_type = ReturnType;
+    using function_type = ReturnType (*)(detail::remove_virtual<Parameters>...);
 
     static method fn;
 
@@ -643,17 +645,18 @@ class method<Name(Parameters...), Return, Policy> : public detail::method_info {
     method(method&&) = delete;
     ~method();
 
-    auto operator()(detail::remove_virtual<Parameters>... args) const -> Return;
+    auto operator()(detail::remove_virtual<Parameters>... args) const
+        -> ReturnType;
 
     template<auto>
-    static FunctionPointer next;
+    static function_type next;
 
   private:
     template<
         auto Overrider, typename OverriderReturn,
         typename... OverriderParameters>
     struct thunk<Overrider, OverriderReturn (*)(OverriderParameters...)> {
-        static auto fn(detail::remove_virtual<Parameters>... arg) -> Return;
+        static auto fn(detail::remove_virtual<Parameters>... arg) -> ReturnType;
         using OverriderParameterTypeIds = detail::type_id_list<
             Policy,
             detail::spec_polymorphic_types<
@@ -691,20 +694,23 @@ class method<Name(Parameters...), Return, Policy> : public detail::method_info {
     };
 };
 
-template<typename Name, typename Return, typename... Parameters, class Policy>
-method<Name(Parameters...), Return, Policy>
-    method<Name(Parameters...), Return, Policy>::fn;
+template<
+    typename Name, typename ReturnType, typename... Parameters, class Policy>
+method<Name(Parameters...), ReturnType, Policy>
+    method<Name(Parameters...), ReturnType, Policy>::fn;
 
-template<typename Name, typename Return, typename... Parameters, class Policy>
+template<
+    typename Name, typename ReturnType, typename... Parameters, class Policy>
 template<auto>
-typename method<Name(Parameters...), Return, Policy>::FunctionPointer
-    method<Name(Parameters...), Return, Policy>::next;
+typename method<Name(Parameters...), ReturnType, Policy>::FunctionPointer
+    method<Name(Parameters...), ReturnType, Policy>::next;
 
 template<typename T>
 constexpr bool is_method = std::is_base_of_v<detail::method_info, T>;
 
-template<typename Name, typename Return, typename... Parameters, class Policy>
-method<Name(Parameters...), Return, Policy>::method() {
+template<
+    typename Name, typename ReturnType, typename... Parameters, class Policy>
+method<Name(Parameters...), ReturnType, Policy>::method() {
     method_info::slots_strides_ptr = slots_strides;
 
     using virtual_type_ids = detail::type_id_list<
@@ -717,22 +723,25 @@ method<Name(Parameters...), Return, Policy>::method() {
     method_info::not_implemented = (void*)not_implemented_handler;
     method_info::method_type = Policy::template static_type<method>();
     method_info::return_type = Policy::template static_type<
-        typename virtual_traits<Policy, Return>::polymorphic_type>();
+        typename virtual_traits<Policy, ReturnType>::polymorphic_type>();
     Policy::methods.push_back(*this);
 }
 
-template<typename Name, typename Return, typename... Parameters, class Policy>
-std::size_t
-    method<Name(Parameters...), Return, Policy>::slots_strides[2 * Arity - 1];
+template<
+    typename Name, typename ReturnType, typename... Parameters, class Policy>
+std::size_t method<
+    Name(Parameters...), ReturnType, Policy>::slots_strides[2 * Arity - 1];
 
-template<typename Name, typename Return, typename... Parameters, class Policy>
-method<Name(Parameters...), Return, Policy>::~method() {
+template<
+    typename Name, typename ReturnType, typename... Parameters, class Policy>
+method<Name(Parameters...), ReturnType, Policy>::~method() {
     Policy::methods.remove(*this);
 }
 
-template<typename Name, typename Return, typename... Parameters, class Policy>
+template<
+    typename Name, typename ReturnType, typename... Parameters, class Policy>
 template<class Error>
-auto method<Name(Parameters...), Return, Policy>::check_static_offset(
+auto method<Name(Parameters...), ReturnType, Policy>::check_static_offset(
     std::size_t actual, std::size_t expected) const -> void {
     using namespace detail;
 
@@ -752,20 +761,23 @@ auto method<Name(Parameters...), Return, Policy>::check_static_offset(
 // -----------------------------------------------------------------------------
 // method dispatch
 
-template<typename Name, typename Return, typename... Parameters, class Policy>
-BOOST_FORCEINLINE auto method<Name(Parameters...), Return, Policy>::operator()(
-    detail::remove_virtual<Parameters>... args) const -> Return {
+template<
+    typename Name, typename ReturnType, typename... Parameters, class Policy>
+BOOST_FORCEINLINE auto
+method<Name(Parameters...), ReturnType, Policy>::operator()(
+    detail::remove_virtual<Parameters>... args) const -> ReturnType {
     using namespace detail;
     auto pf = resolve(parameter_traits<Policy, Parameters>::rarg(args)...);
 
     return pf(std::forward<remove_virtual<Parameters>>(args)...);
 }
 
-template<typename Name, typename Return, typename... Parameters, class Policy>
+template<
+    typename Name, typename ReturnType, typename... Parameters, class Policy>
 template<typename... ArgType>
 BOOST_FORCEINLINE
-    typename method<Name(Parameters...), Return, Policy>::FunctionPointer
-    method<Name(Parameters...), Return, Policy>::resolve(
+    typename method<Name(Parameters...), ReturnType, Policy>::FunctionPointer
+    method<Name(Parameters...), ReturnType, Policy>::resolve(
         const ArgType&... args) const {
     using namespace detail;
 
@@ -780,10 +792,11 @@ BOOST_FORCEINLINE
     return reinterpret_cast<FunctionPointer>(pf);
 }
 
-template<typename Name, typename Return, typename... Parameters, class Policy>
+template<
+    typename Name, typename ReturnType, typename... Parameters, class Policy>
 template<typename ArgType>
 BOOST_FORCEINLINE auto
-method<Name(Parameters...), Return, Policy>::vptr(const ArgType& arg) const
+method<Name(Parameters...), ReturnType, Policy>::vptr(const ArgType& arg) const
     -> const std::uintptr_t* {
     if constexpr (is_virtual_ptr<ArgType>) {
         return arg._vptr();
@@ -794,9 +807,11 @@ method<Name(Parameters...), Return, Policy>::vptr(const ArgType& arg) const
     }
 }
 
-template<typename Name, typename Return, typename... Parameters, class Policy>
+template<
+    typename Name, typename ReturnType, typename... Parameters, class Policy>
 template<typename MethodArgList, typename ArgType, typename... MoreArgTypes>
-BOOST_FORCEINLINE auto method<Name(Parameters...), Return, Policy>::resolve_uni(
+BOOST_FORCEINLINE auto
+method<Name(Parameters...), ReturnType, Policy>::resolve_uni(
     const ArgType& arg, const MoreArgTypes&... more_args) const
     -> std::uintptr_t {
 
@@ -827,10 +842,11 @@ BOOST_FORCEINLINE auto method<Name(Parameters...), Return, Policy>::resolve_uni(
     }
 }
 
-template<typename Name, typename Return, typename... Parameters, class Policy>
+template<
+    typename Name, typename ReturnType, typename... Parameters, class Policy>
 template<typename MethodArgList, typename ArgType, typename... MoreArgTypes>
 BOOST_FORCEINLINE auto
-method<Name(Parameters...), Return, Policy>::resolve_multi_first(
+method<Name(Parameters...), ReturnType, Policy>::resolve_multi_first(
     const ArgType& arg, const MoreArgTypes&... more_args) const
     -> std::uintptr_t {
 
@@ -872,12 +888,13 @@ method<Name(Parameters...), Return, Policy>::resolve_multi_first(
     }
 }
 
-template<typename Name, typename Return, typename... Parameters, class Policy>
+template<
+    typename Name, typename ReturnType, typename... Parameters, class Policy>
 template<
     std::size_t VirtualArg, typename MethodArgList, typename ArgType,
     typename... MoreArgTypes>
 BOOST_FORCEINLINE auto
-method<Name(Parameters...), Return, Policy>::resolve_multi_next(
+method<Name(Parameters...), ReturnType, Policy>::resolve_multi_next(
     const std::uintptr_t* dispatch, const ArgType& arg,
     const MoreArgTypes&... more_args) const -> std::uintptr_t {
 
@@ -925,10 +942,11 @@ method<Name(Parameters...), Return, Policy>::resolve_multi_next(
 // -----------------------------------------------------------------------------
 // Error handling
 
-template<typename Name, typename Return, typename... Parameters, class Policy>
+template<
+    typename Name, typename ReturnType, typename... Parameters, class Policy>
 BOOST_NORETURN auto
-method<Name(Parameters...), Return, Policy>::not_implemented_handler(
-    detail::remove_virtual<Parameters>... args) -> Return {
+method<Name(Parameters...), ReturnType, Policy>::not_implemented_handler(
+    detail::remove_virtual<Parameters>... args) -> ReturnType {
     if constexpr (Policy::template has_facet<policies::error_handler>) {
         not_implemented_error error;
         error.method = Policy::template static_type<method>();
@@ -939,7 +957,8 @@ method<Name(Parameters...), Return, Policy>::not_implemented_handler(
          (*ti_iter++ = Policy::dynamic_type(
               detail::parameter_traits<Policy, Parameters>::rarg(args))));
         std::copy_n(
-            types, (std::min)(sizeof...(args), not_implemented_error::max_types),
+            types,
+            (std::min)(sizeof...(args), not_implemented_error::max_types),
             &error.types[0]);
         Policy::error(error);
     }
@@ -950,12 +969,13 @@ method<Name(Parameters...), Return, Policy>::not_implemented_handler(
 // -----------------------------------------------------------------------------
 // thunk
 
-template<typename Name, typename Return, typename... Parameters, class Policy>
+template<
+    typename Name, typename ReturnType, typename... Parameters, class Policy>
 template<
     auto Overrider, typename OverriderReturn, typename... OverriderParameters>
-auto method<Name(Parameters...), Return, Policy>::
+auto method<Name(Parameters...), ReturnType, Policy>::
     thunk<Overrider, OverriderReturn (*)(OverriderParameters...)>::fn(
-        detail::remove_virtual<Parameters>... arg) -> Return {
+        detail::remove_virtual<Parameters>... arg) -> ReturnType {
     return Overrider(
         detail::parameter_traits<Policy, Parameters>::template cast<
             OverriderParameters>(detail::remove_virtual<Parameters>(arg))...);
@@ -964,9 +984,10 @@ auto method<Name(Parameters...), Return, Policy>::
 // -----------------------------------------------------------------------------
 // overriders
 
-template<typename Name, typename Return, typename... Parameters, class Policy>
+template<
+    typename Name, typename ReturnType, typename... Parameters, class Policy>
 template<auto Function, typename FnReturnType>
-method<Name(Parameters...), Return, Policy>::override_impl<
+method<Name(Parameters...), ReturnType, Policy>::override_impl<
     Function, FnReturnType>::override_impl(FunctionPointer* p_next) {
     using namespace detail;
 
