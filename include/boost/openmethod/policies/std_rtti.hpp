@@ -34,7 +34,7 @@ struct std_rtti : virtual rtti {
     }
 
     template<typename Stream>
-    static void type_name(type_id type, Stream& stream) {
+    static auto type_name(type_id type, Stream& stream) -> void {
         stream << boost::core::demangle(
             reinterpret_cast<const std::type_info*>(type)->name());
     }

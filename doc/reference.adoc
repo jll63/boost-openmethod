@@ -36,8 +36,160 @@
 
 ### basic_policy
 
-#### rtti
+### rtti
+```c++
+struct rtti;
 
-##### std_rtti
+struct deferred_static_rtti : virtual rtti;
+```
 
-##### deferred_rtti
+A `rtti` facet provides type information for classes and objects, implements
+downcast in presence of virtual inheritance, and writes descriptions of types to
+an `ostream`-like object.
+
+A `deferred_static_rtti`, derived from `rtti`, directs YOMM2 to defer collection
+of static type information until `initialize` is called. This makes it possible
+to interface with custom RTTI systems that use static constructors to assign
+type information.
+
+## Requirements for implementations of **rtti**
+
+[cols="a,a,a", options="header"]
+
+|===
+| Name
+| Description
+| Required
+
+| type_id static_type<T>
+| return a `type_id` for `T`
+| yes
+
+| type_id dynamic_type<T>
+| return a `type_id` for an object's dynamic type
+| depending on context
+
+| void type_name<Stream>
+| write a description of `type_id` to a stream
+| no
+
+| *unspecified* type_index]
+| return a unique key for a `type_id`
+| depending on context
+| D dynamic_cast_ref<D, B>]
+| cast from base class to derived class
+| if using virtual inheritance
+|===
+
+
+
+#### std_rtti
+
+```c++
+namespace boost {
+namespace openmethod {
+namespace policies {
+
+struct std_rtti : virtual rtti {
+    template<class Class>
+    static auto static_type() -> type_id;
+
+    template<class Class>
+    static auto dynamic_type(const Class& obj) -> type_id;
+
+    template<typename Stream>
+    static auto type_name(type_id type, Stream& stream) -> void;
+
+    static auto type_index(type_id type) -> std::type_index;
+
+    template<typename D, typename B>
+    static auto dynamic_cast_ref(B&& obj) -> D;
+};
+
+}}}
+```
+
+### static_type
+
+```c++
+template<class Class>
+static type_id static_type();
+```
+
+Return `&typeid(Class)`, cast to a `type_id`.
+
+**Template parameters**
+
+* Class: a class registered via ->register_classes or ->use_classes.
+
+### dynamic_type
+
+```c++
+template<class Class>
+static type_id dynamic_type(const Class& obj);
+```
+
+Return `&typeid(obj)`, cast to a `type_id`.
+
+**Template parameters**
+
+* Class: a class registered via ->register_classes or ->use_classes.
+
+### type_name
+
+```c++
+template<typename Stream>
+static void type_name(type_id type, Stream& stream);
+```
+
+Execute `stream << reinterpret_cast<const std::type_info*>(type)->name()`.
+
+**Template parameters**
+
+* `Stream`: a model of ->`RestrictedOutputStream`.
+
+**Function parameters**
+
+* `type`: the type id of the class to describe.
+* `stream`: the stream to write the description to.
+
+
+### type_index
+
+```c++
+static /*unspecified*/ type_index(type_id type);
+```
+
+Return `std::type_index(*reinterpret_cast<const std::type_info*>(type))`.
+
+The function is required because C++ does *not* guarantee that there is a single
+instance of `std::type_info` for each specific type. `update` builds a map
+associating the `std::type_index`s to a set of `type_id`s, thus ensuring proper
+operation, even in the (unlikely) case that some types have multiple `type_info`
+objects, and thus `static_type` and `dynamic_type` do not return the same value
+for the same class.
+
+**Function parameters**
+
+* `type`: the type id of a class
+
+### dynamic_cast_ref
+
+```c++
+template<typename Derived, typename Base>
+static Derived dynamic_cast_ref(Base&& obj);
+```
+
+Cast `obj` using the `dynamic_cast` operator. Note that YOMM2 will use a
+`static_cast` whenever possible.
+
+**Template parameters**
+
+* `Base`: a registered class.  `Base&&` is guaranteed to evaluate to a
+  reference
+* `Derived`: a registered class, derived from `Base`.
+
+**Function parameters**
+
+* `obj`: the object to cast.
+  to a `Base` object.
