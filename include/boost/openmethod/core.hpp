@@ -571,7 +571,7 @@ template<
 class method;
 
 template<
-    typename Name, typename ReturnType, typename... Parameters, class Policy>
+    typename Name, typename... Parameters, typename ReturnType, class Policy>
 class method<Name(Parameters...), ReturnType, Policy>
     : public detail::method_info {
     // Aliases used in implementation only. Everything extracted from template
@@ -695,12 +695,12 @@ class method<Name(Parameters...), ReturnType, Policy>
 };
 
 template<
-    typename Name, typename ReturnType, typename... Parameters, class Policy>
+    typename Name, typename... Parameters, typename ReturnType, class Policy>
 method<Name(Parameters...), ReturnType, Policy>
     method<Name(Parameters...), ReturnType, Policy>::fn;
 
 template<
-    typename Name, typename ReturnType, typename... Parameters, class Policy>
+    typename Name, typename... Parameters, typename ReturnType, class Policy>
 template<auto>
 typename method<Name(Parameters...), ReturnType, Policy>::FunctionPointer
     method<Name(Parameters...), ReturnType, Policy>::next;
@@ -709,7 +709,7 @@ template<typename T>
 constexpr bool is_method = std::is_base_of_v<detail::method_info, T>;
 
 template<
-    typename Name, typename ReturnType, typename... Parameters, class Policy>
+    typename Name, typename... Parameters, typename ReturnType, class Policy>
 method<Name(Parameters...), ReturnType, Policy>::method() {
     method_info::slots_strides_ptr = slots_strides;
 
@@ -728,18 +728,18 @@ method<Name(Parameters...), ReturnType, Policy>::method() {
 }
 
 template<
-    typename Name, typename ReturnType, typename... Parameters, class Policy>
+    typename Name, typename... Parameters, typename ReturnType, class Policy>
 std::size_t method<
     Name(Parameters...), ReturnType, Policy>::slots_strides[2 * Arity - 1];
 
 template<
-    typename Name, typename ReturnType, typename... Parameters, class Policy>
+    typename Name, typename... Parameters, typename ReturnType, class Policy>
 method<Name(Parameters...), ReturnType, Policy>::~method() {
     Policy::methods.remove(*this);
 }
 
 template<
-    typename Name, typename ReturnType, typename... Parameters, class Policy>
+    typename Name, typename... Parameters, typename ReturnType, class Policy>
 template<class Error>
 auto method<Name(Parameters...), ReturnType, Policy>::check_static_offset(
     std::size_t actual, std::size_t expected) const -> void {
@@ -762,7 +762,7 @@ auto method<Name(Parameters...), ReturnType, Policy>::check_static_offset(
 // method dispatch
 
 template<
-    typename Name, typename ReturnType, typename... Parameters, class Policy>
+    typename Name, typename... Parameters, typename ReturnType, class Policy>
 BOOST_FORCEINLINE auto
 method<Name(Parameters...), ReturnType, Policy>::operator()(
     detail::remove_virtual<Parameters>... args) const -> ReturnType {
@@ -773,7 +773,7 @@ method<Name(Parameters...), ReturnType, Policy>::operator()(
 }
 
 template<
-    typename Name, typename ReturnType, typename... Parameters, class Policy>
+    typename Name, typename... Parameters, typename ReturnType, class Policy>
 template<typename... ArgType>
 BOOST_FORCEINLINE
     typename method<Name(Parameters...), ReturnType, Policy>::FunctionPointer
@@ -793,7 +793,7 @@ BOOST_FORCEINLINE
 }
 
 template<
-    typename Name, typename ReturnType, typename... Parameters, class Policy>
+    typename Name, typename... Parameters, typename ReturnType, class Policy>
 template<typename ArgType>
 BOOST_FORCEINLINE auto
 method<Name(Parameters...), ReturnType, Policy>::vptr(const ArgType& arg) const
@@ -808,7 +808,7 @@ method<Name(Parameters...), ReturnType, Policy>::vptr(const ArgType& arg) const
 }
 
 template<
-    typename Name, typename ReturnType, typename... Parameters, class Policy>
+    typename Name, typename... Parameters, typename ReturnType, class Policy>
 template<typename MethodArgList, typename ArgType, typename... MoreArgTypes>
 BOOST_FORCEINLINE auto
 method<Name(Parameters...), ReturnType, Policy>::resolve_uni(
@@ -843,7 +843,7 @@ method<Name(Parameters...), ReturnType, Policy>::resolve_uni(
 }
 
 template<
-    typename Name, typename ReturnType, typename... Parameters, class Policy>
+    typename Name, typename... Parameters, typename ReturnType, class Policy>
 template<typename MethodArgList, typename ArgType, typename... MoreArgTypes>
 BOOST_FORCEINLINE auto
 method<Name(Parameters...), ReturnType, Policy>::resolve_multi_first(
@@ -889,7 +889,7 @@ method<Name(Parameters...), ReturnType, Policy>::resolve_multi_first(
 }
 
 template<
-    typename Name, typename ReturnType, typename... Parameters, class Policy>
+    typename Name, typename... Parameters, typename ReturnType, class Policy>
 template<
     std::size_t VirtualArg, typename MethodArgList, typename ArgType,
     typename... MoreArgTypes>
@@ -943,7 +943,7 @@ method<Name(Parameters...), ReturnType, Policy>::resolve_multi_next(
 // Error handling
 
 template<
-    typename Name, typename ReturnType, typename... Parameters, class Policy>
+    typename Name, typename... Parameters, typename ReturnType, class Policy>
 BOOST_NORETURN auto
 method<Name(Parameters...), ReturnType, Policy>::not_implemented_handler(
     detail::remove_virtual<Parameters>... args) -> ReturnType {
@@ -970,7 +970,7 @@ method<Name(Parameters...), ReturnType, Policy>::not_implemented_handler(
 // thunk
 
 template<
-    typename Name, typename ReturnType, typename... Parameters, class Policy>
+    typename Name, typename... Parameters, typename ReturnType, class Policy>
 template<
     auto Overrider, typename OverriderReturn, typename... OverriderParameters>
 auto method<Name(Parameters...), ReturnType, Policy>::
@@ -985,7 +985,7 @@ auto method<Name(Parameters...), ReturnType, Policy>::
 // overriders
 
 template<
-    typename Name, typename ReturnType, typename... Parameters, class Policy>
+    typename Name, typename... Parameters, typename ReturnType, class Policy>
 template<auto Function, typename FnReturnType>
 method<Name(Parameters...), ReturnType, Policy>::override_impl<
     Function, FnReturnType>::override_impl(FunctionPointer* p_next) {

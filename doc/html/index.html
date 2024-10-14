@@ -1793,7 +1793,7 @@ reading the type information until <code>initialize</code> is called.</p>
 <div class="paragraph">
 <p>The macro expands to several constructs, the most important of which is an
 inline function called <code>NAME</code>, with a formal parameter list that consists of the
-types listed in <code><em>PARAMETERS</em></code>, stripped from any <code>virtual_</code> decorator
+types listed in <code>PARAMETERS</code>, stripped from any <code>virtual_</code> decorator
 (<code>virtual_ptr</code>s are preserved), and returning a <code>RETURN_TYPE</code>.</p>
 </div>
 <div class="paragraph">
@@ -2064,38 +2064,31 @@ the class template that contains the overriders for the method named <code>NAME<
 <span class="k">namespace</span> <span class="n">openmethod</span> <span class="p">{</span>
 
 <span class="k">template</span><span class="o">&lt;</span>
-    <span class="k">typename</span> <span class="nc">Method</span><span class="p">,</span> <span class="k">typename</span> <span class="nc">ReturnType</span><span class="p">,</span>
+    <span class="k">typename</span><span class="p">,</span> <span class="k">typename</span> <span class="nc">ReturnType</span><span class="p">,</span>
     <span class="k">class</span> <span class="nc">Policy</span> <span class="o">=</span> <span class="n">BOOST_OPENMETHOD_DEFAULT_POLICY</span><span class="p">&gt;</span>
-<span class="k">struct</span> <span class="nc">method</span><span class="p">;</span>
+<span class="k">class</span> <span class="nc">method</span><span class="p">;</span>
 
-<span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="nc">Name</span><span class="p">,</span> <span class="k">typename</span> <span class="nc">ReturnType</span><span class="p">,</span> <span class="k">typename</span><span class="o">...</span> <span class="nc">Parameters</span><span class="p">,</span> <span class="k">class</span> <span class="nc">Policy</span><span class="p">&gt;</span>
+<span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="nc">Name</span><span class="p">,</span> <span class="k">typename</span><span class="o">...</span> <span class="nc">Parameters</span><span class="p">,</span> <span class="k">typename</span> <span class="nc">ReturnType</span><span class="p">,</span> <span class="k">class</span> <span class="nc">Policy</span><span class="p">&gt;</span>
 <span class="k">class</span> <span class="nc">method</span><span class="o">&lt;</span><span class="n">Name</span><span class="p">(</span><span class="n">Parameters</span><span class="p">...),</span> <span class="n">ReturnType</span><span class="p">,</span> <span class="n">Policy</span><span class="o">&gt;</span> <span class="p">{</span>
   <span class="nl">public:</span>
-    <span class="k">using</span> <span class="n">name_type</span> <span class="o">=</span> <span class="n">Name</span><span class="p">;</span>
-    <span class="k">using</span> <span class="n">return_type</span> <span class="o">=</span> <span class="n">ReturnType</span><span class="p">;</span>
-    <span class="k">using</span> <span class="n">function_type</span> <span class="o">=</span> <span class="n">ReturnType</span> <span class="p">(</span><span class="o">*</span><span class="p">)(</span><span class="n">detail</span><span class="o">::</span><span class="n">remove_virtual</span><span class="o">&lt;</span><span class="n">Parameters</span><span class="o">&gt;</span><span class="p">...);</span>
+    <span class="k">template</span><span class="o">&lt;</span><span class="k">auto</span><span class="p">...</span> <span class="n">Functions</span><span class="p">&gt;</span>
+    <span class="k">struct</span> <span class="nc">override</span><span class="p">;</span>
 
     <span class="n">method</span><span class="p">();</span>
     <span class="n">method</span><span class="p">(</span><span class="k">const</span> <span class="n">method</span><span class="o">&amp;</span><span class="p">)</span> <span class="o">=</span> <span class="k">delete</span><span class="p">;</span>
     <span class="n">method</span><span class="p">(</span><span class="n">method</span><span class="o">&amp;&amp;</span><span class="p">)</span> <span class="o">=</span> <span class="k">delete</span><span class="p">;</span>
     <span class="o">~</span><span class="n">method</span><span class="p">();</span>
 
-    <span class="k">auto</span> <span class="k">operator</span><span class="p">()(</span><span class="n">detail</span><span class="o">::</span><span class="n">remove_virtual</span><span class="o">&lt;</span><span class="n">Parameters</span><span class="o">&gt;</span><span class="p">...</span> <span class="n">args</span><span class="p">)</span> <span class="k">const</span> <span class="o">-&gt;</span> <span class="n">ReturnType</span><span class="p">;</span>
+    <span class="k">auto</span> <span class="k">operator</span><span class="p">()(</span><span class="n">remove_virtual</span><span class="o">&lt;</span><span class="n">Parameters</span><span class="o">&gt;</span><span class="p">...</span> <span class="n">args</span><span class="p">)</span> <span class="k">const</span> <span class="o">-&gt;</span> <span class="n">ReturnType</span><span class="p">;</span>
 
     <span class="k">static</span> <span class="n">method</span> <span class="n">fn</span><span class="p">;</span>
 
     <span class="k">template</span><span class="o">&lt;</span><span class="k">auto</span><span class="p">&gt;</span>
     <span class="k">static</span> <span class="n">function_type</span> <span class="n">next</span><span class="p">;</span>
-
-    <span class="k">template</span><span class="o">&lt;</span><span class="k">auto</span><span class="p">...</span> <span class="n">Function</span><span class="p">&gt;</span>
-    <span class="k">struct</span> <span class="nc">override</span><span class="p">;</span>
 <span class="p">};</span>
 
 <span class="p">}}</span></code></pre>
 </div>
-</div>
-<div class="paragraph">
-<p><code>basic_error_output</code> implements the <code>error_output</code> facet.</p>
 </div>
 <div class="paragraph">
 <p><strong>Template Parameters</strong></p>
@@ -2107,26 +2100,141 @@ the class template that contains the overriders for the method named <code>NAME<
 </colgroup>
 <tbody>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><em>Policy</em></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">The policy containing the facet.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><em>Name</em></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The name of the method.</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><em>Stream</em></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Any type that satisfies the requirements of <code>RestrictedOutputStream</code>.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><em>Parameters</em></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The formal parameters of the method.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><em>ReturnType</em></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The return type of the method.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><em>Policy</em></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The policy.</p></td>
 </tr>
 </tbody>
 </table>
+<div class="paragraph">
+<p><code>method</code> is a class template that represents an open method. It contains a singleton named <code>fn</code>, a function object that
+selects an overrider to call based on the dynamic type of the arguments corresponding to virtual formal parameters.</p>
+</div>
+<div class="paragraph">
+<p>The overrider is selected in a process similar to overloaded function resolution, with extra rules to handle ambiguitues. It proceeds as follows:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Form the set of all applicable overriders. An overrider is applicable if it
+can be called with the arguments passed to the method.</p>
+</li>
+<li>
+<p>If the set is empty, call the error handler (if present in the policy), then
+terminate the program with <code>abort</code></p>
+</li>
+<li>
+<p>Remove the overriders that are dominated by other overriders in the set.
+Overrider A dominates overrider B if any of its virtual formal parameters is more specialized than B&#8217;s, and if none of B&#8217;s virtual parameters is more
+specialized than A&#8217;s.</p>
+</li>
+<li>
+<p>If the resulting set contains only one overrider, call it.</p>
+</li>
+<li>
+<p>If the return type is a registered polymorphic type, remove all the overriders that
+return a less specific type than the others.</p>
+</li>
+<li>
+<p>If the resulting set contains only one overrider, call it.</p>
+</li>
+<li>
+<p>Otherwise, call one of the remaining overriders. Which overrider is selected is
+not specified, but it is the same across calls with the same arguments types.</p>
+</li>
+</ol>
+</div>
 <div class="sect4">
-<h5 id="error_stream">error_stream</h5>
+<h5 id="constructor">constructor</h5>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="c++"><span class="n">Stream</span>  <span class="n">error_stream</span><span class="p">;</span></code></pre>
+<pre class="rouge highlight"><code data-lang="c++"><span class="n">method</span><span class="p">();</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Initialized by the default constructor of <code>Stream</code>. It is the responsibility of
-the program to initializate it if needed, e.g., for a <code>std::ofstream</code>, to open
-it.</p>
+<p>Add the method to the list of methods registered in <code>Policy</code>.</p>
+</div>
+</div>
+<div class="sect4">
+<h5 id="destructor">destructor</h5>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="c++"><span class="o">~</span><span class="n">method</span><span class="p">();</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Remove the method from the list of methods registered in <code>Policy</code>.</p>
+</div>
+</div>
+<div class="sect4">
+<h5 id="override">override</h5>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="c++"><span class="k">template</span><span class="o">&lt;</span><span class="k">auto</span><span class="p">...</span> <span class="n">Functions</span><span class="p">&gt;</span>
+<span class="k">struct</span> <span class="nc">override</span><span class="p">;</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Add <code>Functions</code> to the list of overriders for the method.</p>
+</div>
+<div class="paragraph">
+<p>Each function that must fulfill the following requirements:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Have the same number of formal parameters as the method.</p>
+</li>
+<li>
+<p>Each formal parameter in the same position as a virtual parameter must have a
+type that is covariant with the type of the method&#8217;s parameter.</p>
+</li>
+<li>
+<p>All other formal parameters must have the same type as the method&#8217;s
+corresponding parameters.</p>
+</li>
+<li>
+<p>The return type of the overrider must be the same as the method&#8217;s return type or,
+if it is a polymorphic type, covariant with the method&#8217;s return type.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect4">
+<h5 id="operator">operator()</h5>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="c++"><span class="k">auto</span> <span class="k">operator</span><span class="p">()(</span><span class="n">remove_virtual</span><span class="o">&lt;</span><span class="n">Parameters</span><span class="o">&gt;</span><span class="p">...</span> <span class="n">args</span><span class="p">)</span> <span class="k">const</span> <span class="o">-&gt;</span> <span class="n">ReturnType</span><span class="p">;</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Call the method with the arguments <code>args</code>.</p>
+</div>
+<div class="paragraph">
+<p><code>remove_virtual</code> is a metafunction that removes the <code>virtual_</code> decorator from a type <code>T</code>. If <code>T</code> is in the form
+<code>virtual_&lt;U&gt;</code>, it evaluates to <code>U</code>. Otherwise, it evaluates to <code>T</code>.</p>
+</div>
+</div>
+<div class="sect4">
+<h5 id="fn">fn</h5>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="c++"><span class="n">method</span> <span class="n">fn</span><span class="p">;</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The only instance of the method, and the entry point for calling the method.</p>
 </div>
 </div>
 </div>
@@ -2188,7 +2296,7 @@ it.</p>
 </tbody>
 </table>
 <div class="sect4">
-<h5 id="error_stream_2">error_stream</h5>
+<h5 id="error_stream">error_stream</h5>
 <div class="listingblock">
 <div class="content">
 <pre class="rouge highlight"><code data-lang="c++"><span class="n">Stream</span>  <span class="n">error_stream</span><span class="p">;</span></code></pre>

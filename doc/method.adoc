@@ -1,0 +1,136 @@
+
+[#method]
+### method
+
+```c++
+namespace boost {
+namespace openmethod {
+
+template<
+    typename, typename ReturnType,
+    class Policy = BOOST_OPENMETHOD_DEFAULT_POLICY>
+class method;
+
+template<typename Name, typename... Parameters, typename ReturnType, class Policy>
+class method<Name(Parameters...), ReturnType, Policy> {
+  public:
+    template<auto... Functions>
+    struct override;
+
+    method();
+    method(const method&) = delete;
+    method(method&&) = delete;
+    ~method();
+
+    auto operator()(remove_virtual<Parameters>... args) const -> ReturnType;
+
+    static method fn;
+
+    template<auto>
+    static function_type next;
+};
+
+}}
+```
+
+*Template Parameters*
+
+[cols="1,1"]
+|===
+
+|_Name_
+| The name of the method.
+
+|_Parameters_
+| The formal parameters of the method.
+
+|_ReturnType_
+| The return type of the method.
+
+
+|_Policy_
+| The policy.
+
+|===
+
+`method` is a class template that represents an open method. It contains a singleton named `fn`, a function object that
+selects an overrider to call based on the dynamic type of the arguments corresponding to virtual formal parameters.
+
+The overrider is selected in a process similar to overloaded function resolution, with extra rules to handle ambiguitues. It proceeds as follows:
+
+1. Form the set of all applicable overriders. An overrider is applicable if it
+   can be called with the arguments passed to the method.
+
+2. If the set is empty, call the error handler (if present in the policy), then
+   terminate the program with `abort`
+
+3. Remove the overriders that are dominated by other overriders in the set.
+   Overrider A dominates overrider B if any of its virtual formal parameters is more specialized than B's, and if none of B's virtual parameters is more
+   specialized than A's.
+
+4. If the resulting set contains only one overrider, call it.
+
+5. If the return type is a registered polymorphic type, remove all the overriders that
+   return a less specific type than the others.
+
+6. If the resulting set contains only one overrider, call it.
+
+7. Otherwise, call one of the remaining overriders. Which overrider is selected is
+  not specified, but it is the same across calls with the same arguments types.
+
+#### constructor
+
+```c++
+method();
+```
+
+Add the method to the list of methods registered in `Policy`.
+
+#### destructor
+
+```c++
+~method();
+```
+
+Remove the method from the list of methods registered in `Policy`.
+
+#### override
+
+```c++
+template<auto... Functions>
+struct override;
+```
+
+Add `Functions` to the list of overriders for the method.
+
+Each function that must fulfill the following requirements:
+
+* Have the same number of formal parameters as the method.
+
+* Each formal parameter in the same position as a virtual parameter must have a
+  type that is covariant with the type of the method's parameter.
+
+* All other formal parameters must have the same type as the method's
+  corresponding parameters.
+
+* The return type of the overrider must be the same as the method's return type or,
+  if it is a polymorphic type, covariant with the method's return type.
+
+#### operator()
+
+```c++
+auto operator()(remove_virtual<Parameters>... args) const -> ReturnType;
+```
+
+Call the method with the arguments `args`.
+
+`remove_virtual` is a metafunction that removes the `virtual_` decorator from a type `T`. If `T` is in the form
+`virtual_<U>`, it evaluates to `U`. Otherwise, it evaluates to `T`.
+
+#### fn
+
+```c++
+method fn;
+```z
+
+The only instance of the method, and the entry point for calling the method.

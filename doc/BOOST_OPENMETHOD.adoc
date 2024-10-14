@@ -31,7 +31,7 @@ Create an open-method.
 
 The macro expands to several constructs, the most important of which is an
 inline function called `NAME`, with a formal parameter list that consists of the
-types listed in `_PARAMETERS_`, stripped from any `virtual_` decorator
+types listed in `PARAMETERS`, stripped from any `virtual_` decorator
 (`virtual_ptr`{empty}s are preserved), and returning a `RETURN_TYPE`.
 
 The function creates additional entities:
