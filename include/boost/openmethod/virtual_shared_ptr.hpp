@@ -8,6 +8,8 @@
 namespace boost {
 namespace openmethod {
 
+namespace detail {
+
 template<typename T>
 struct shared_ptr_traits {
     static const bool is_shared_ptr = false;
@@ -100,7 +102,7 @@ struct virtual_ptr_traits<std::shared_ptr<Class>, Policy> {
     template<typename OtherPtrRef>
     static auto cast(const std::shared_ptr<Class>& ptr) -> decltype(auto) {
         using OtherPtr = typename std::remove_reference_t<OtherPtrRef>;
-        using OtherClass = typename OtherPtr::box_type::element_type;
+        using OtherClass = typename OtherPtr::pointer_type::element_type;
 
         if constexpr (detail::requires_dynamic_cast<Class&, OtherClass&>) {
             return std::dynamic_pointer_cast<OtherClass>(ptr);
@@ -109,8 +111,6 @@ struct virtual_ptr_traits<std::shared_ptr<Class>, Policy> {
         }
     }
 };
-
-namespace detail {
 
 template<class... Ts>
 using virtual_ptr_class = std::conditional_t<

@@ -66,21 +66,20 @@ namespace BOOST_OPENMETHOD_GENSYM {
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(
     test_virtual_ptr, Policy, policy_types<__COUNTER__>) {
-    using namespace detail;
 
-    static use_classes<Player, Warrior, Object, Axe, Bear, Policy>
-        BOOST_OPENMETHOD_GENSYM;
+    BOOST_OPENMETHOD_REGISTER(
+        use_classes<Player, Warrior, Object, Axe, Bear, Policy>);
+    ;
     using poke = method<
         BOOST_OPENMETHOD_NAME(poke)(virtual_ptr<Player, Policy>), std::string,
         Policy>;
-    static
-        typename poke::template override<poke_bear<virtual_ptr<Player, Policy>>>
-            BOOST_OPENMETHOD_GENSYM;
+    BOOST_OPENMETHOD_REGISTER(typename poke::template override<
+                              poke_bear<virtual_ptr<Player, Policy>>>);
 
     initialize<Policy>();
 
     using vptr_player = virtual_ptr<Player, Policy>;
-    static_assert(is_virtual_ptr<vptr_player>);
+    static_assert(detail::is_virtual_ptr<vptr_player>);
     using vptr_cat = virtual_ptr<Bear, Policy>;
 
     Player player;
@@ -126,25 +125,24 @@ namespace test_virtual_ptr_dispatch {
 BOOST_AUTO_TEST_CASE_TEMPLATE(
     test_virtual_ptr_dispatch, Policy, policy_types<__COUNTER__>) {
 
-    static use_classes<Player, Warrior, Object, Axe, Bear, Policy>
-        BOOST_OPENMETHOD_GENSYM;
+    BOOST_OPENMETHOD_REGISTER(
+        use_classes<Player, Warrior, Object, Axe, Bear, Policy>);
 
     using poke = method<
         BOOST_OPENMETHOD_NAME(poke)(virtual_ptr<Player, Policy>), std::string,
         Policy>;
-    static
-        typename poke::template override<poke_bear<virtual_ptr<Player, Policy>>>
-            BOOST_OPENMETHOD_GENSYM;
+    BOOST_OPENMETHOD_REGISTER(typename poke::template override<
+                              poke_bear<virtual_ptr<Player, Policy>>>);
 
     using fight = method<
         BOOST_OPENMETHOD_NAME(fight)(
             virtual_ptr<Player, Policy>, virtual_ptr<Object, Policy>,
             virtual_ptr<Player, Policy>),
         std::string, Policy>;
-    static typename fight::template override<fight_bear<
-        virtual_ptr<Player, Policy>, virtual_ptr<Object, Policy>,
-        virtual_ptr<Player, Policy>>>
-        BOOST_OPENMETHOD_GENSYM;
+    BOOST_OPENMETHOD_REGISTER(
+        typename fight::template override<fight_bear<
+            virtual_ptr<Player, Policy>, virtual_ptr<Object, Policy>,
+            virtual_ptr<Player, Policy>>>);
 
     initialize<Policy>();
 
@@ -162,30 +160,20 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(
 
 } // namespace test_virtual_ptr_dispatch
 
-namespace test_virtual_shared_ptr {
-
-BOOST_AUTO_TEST_CASE(test_virtual_shared_ptr) {
-    auto bear = std::make_shared<Bear>();
-    virtual_shared_ptr<Bear> vbear(bear);
-}
-
-} // namespace test_virtual_shared_ptr
-
 namespace test_virtual_shared_ptr_dispatch {
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(
     test_virtual_ptr_dispatch, Policy, policy_types<__COUNTER__>) {
 
-    static use_classes<Player, Warrior, Object, Axe, Bear, Policy>
-        BOOST_OPENMETHOD_GENSYM;
+    BOOST_OPENMETHOD_REGISTER(
+        use_classes<Player, Warrior, Object, Axe, Bear, Policy>);
 
     using poke = method<
         BOOST_OPENMETHOD_NAME(poke)(virtual_shared_ptr<Player, Policy>),
         std::string, Policy>;
 
-    static typename poke::template override<
-        poke_bear<virtual_shared_ptr<Player, Policy>>>
-        BOOST_OPENMETHOD_GENSYM;
+    BOOST_OPENMETHOD_REGISTER(typename poke::template override<
+                              poke_bear<virtual_shared_ptr<Player, Policy>>>);
 
     using fight = method<
         BOOST_OPENMETHOD_NAME(fight)(
@@ -194,10 +182,10 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(
             virtual_shared_ptr<Player, Policy>),
         std::string, Policy>;
 
-    static typename fight::template override<fight_bear<
-        virtual_shared_ptr<Player, Policy>, virtual_shared_ptr<Object, Policy>,
-        virtual_shared_ptr<Player, Policy>>>
-        BOOST_OPENMETHOD_GENSYM;
+    BOOST_OPENMETHOD_REGISTER(typename fight::template override<fight_bear<
+                                  virtual_shared_ptr<Player, Policy>,
+                                  virtual_shared_ptr<Object, Policy>,
+                                  virtual_shared_ptr<Player, Policy>>>);
 
     initialize<Policy>();
 

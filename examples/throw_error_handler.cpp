@@ -19,7 +19,7 @@ struct Dog : Animal {};
 namespace bom = boost::openmethod;
 
 struct throwing_policy
-    : bom::policies::default_::rebind<throwing_policy>::replace<
+    : bom::policies::default_::fork<throwing_policy>::replace<
           bom::policies::error_handler, bom::policies::throw_error> {};
 
 BOOST_OPENMETHOD_CLASSES(Animal, Cat, Dog, throwing_policy);

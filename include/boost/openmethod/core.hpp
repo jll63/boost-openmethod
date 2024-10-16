@@ -156,8 +156,6 @@ auto optimal_cast(B&& obj) -> decltype(auto) {
     }
 }
 
-} // namespace detail
-
 // =============================================================================
 // virtual_traits
 
@@ -210,8 +208,6 @@ struct virtual_traits<Policy, T&&> {
 
 // =============================================================================
 // Common details
-
-namespace detail {
 
 template<typename T>
 struct is_virtual : std::false_type {};
@@ -285,8 +281,6 @@ template<class Class, class Policy>
 struct is_virtual_ptr_aux<const virtual_ptr<Class, Policy>&> : std::true_type {
 };
 
-} // namespace detail
-
 template<class Class, class Policy>
 struct virtual_ptr_traits {
     static bool constexpr is_smart_ptr = false;
@@ -316,8 +310,16 @@ struct virtual_traits<Policy, const virtual_ptr<Class, Policy>&>
 template<typename T>
 constexpr bool is_virtual_ptr = detail::is_virtual_ptr_aux<T>::value;
 
-template<class Class, class Policy = BOOST_OPENMETHOD_DEFAULT_POLICY>
+} // namespace detail
+
+template<class Type, class Policy = BOOST_OPENMETHOD_DEFAULT_POLICY>
 class virtual_ptr {
+    constexpr static bool IsSmartPtr =
+        detail::virtual_ptr_traits<Type, Policy>::is_smart_ptr;
+
+  public:
+    using pointer_type = std::conditional_t<IsSmartPtr, Type, Type*>;
+
     template<class, class>
     friend class virtual_ptr;
 
@@ -325,16 +327,13 @@ class virtual_ptr {
     friend struct virtual_traits;
 
   protected:
-    constexpr static bool IsSmartPtr =
-        virtual_ptr_traits<Class, Policy>::is_smart_ptr;
-    using Box = std::conditional_t<IsSmartPtr, Class, Class*>;
     static constexpr bool is_indirect =
         Policy::template has_facet<policies::indirect_vptr>;
 
     using vptr_type = std::conditional_t<
         is_indirect, std::uintptr_t const* const*, std::uintptr_t const*>;
 
-    Box obj;
+    pointer_type obj;
     vptr_type vptr;
 
     template<typename Other>
@@ -360,47 +359,13 @@ class virtual_ptr {
     }
 
   public:
-    using element_type = Class;
-    using box_type = Box;
+    using element_type =
+        std::remove_reference_t<decltype(*std::declval<pointer_type>())>;
 
     template<class Other>
     virtual_ptr(Other&& other) {
         box(other);
-
-        using namespace policies;
-        using namespace detail;
-
-        static_assert(
-            std::is_polymorphic_v<polymorphic_type<
-                Policy, const std::remove_reference_t<Other>&>>,
-            "use 'final' if intended");
-
-        auto dynamic_id =
-            Policy::dynamic_type(virtual_traits<Policy, Other&>::rarg(other));
-        auto static_id = Policy::template static_type<
-            typename virtual_traits<Policy, Other&>::polymorphic_type>();
-
-        if (dynamic_id == static_id) {
-            if constexpr (Policy::template has_facet<indirect_vptr>) {
-                vptr = &Policy::template static_vptr<
-                    typename virtual_traits<Policy, Other&>::polymorphic_type>;
-            } else {
-                vptr = Policy::template static_vptr<
-                    typename virtual_traits<Policy, Other&>::polymorphic_type>;
-            }
-        } else {
-            auto index = dynamic_id;
-
-            if constexpr (Policy::template has_facet<type_hash>) {
-                index = Policy::hash_type_id(index);
-            }
-
-            if constexpr (Policy::template has_facet<indirect_vptr>) {
-                vptr = Policy::indirect_vptrs[index];
-            } else {
-                vptr = Policy::vptrs[index];
-            }
-        }
+        vptr = Policy::dynamic_vptr(*obj);
     }
 
     template<class Other>
@@ -418,15 +383,15 @@ class virtual_ptr {
         : obj(std::move(other.obj)), vptr(other.vptr) {
     }
 
-    auto get() const {
+    auto get() const -> pointer_type {
         return obj;
     }
 
-    auto operator->() const {
+    auto operator->() const -> pointer_type {
         return get();
     }
 
-    auto operator*() const -> decltype(auto) {
+    auto operator*() const -> element_type& {
         return *get();
     }
 
@@ -476,7 +441,7 @@ class virtual_ptr {
 
         if constexpr (IsSmartPtr) {
             result.obj =
-                virtual_ptr_traits<Class, Policy>::template cast<Other>(obj);
+                virtual_ptr_traits<Type, Policy>::template cast<Other>(obj);
         } else {
             result.obj =
                 &detail::optimal_cast<Policy, typename Other::element_type&>(
@@ -499,8 +464,8 @@ class virtual_ptr {
     virtual_ptr() = default;
 };
 
-template<class Class>
-virtual_ptr(Class&) -> virtual_ptr<Class, BOOST_OPENMETHOD_DEFAULT_POLICY>;
+template<class Type>
+virtual_ptr(Type&) -> virtual_ptr<Type, BOOST_OPENMETHOD_DEFAULT_POLICY>;
 
 template<class Policy, class Class>
 inline auto final_virtual_ptr(Class& obj) {
@@ -722,8 +687,9 @@ method<Name(Parameters...), ReturnType, Policy>::method() {
     method_info::vp_end = virtual_type_ids::end;
     method_info::not_implemented = (void*)not_implemented_handler;
     method_info::method_type = Policy::template static_type<method>();
-    method_info::return_type = Policy::template static_type<
-        typename virtual_traits<Policy, ReturnType>::polymorphic_type>();
+    method_info::return_type =
+        Policy::template static_type<typename detail::virtual_traits<
+            Policy, ReturnType>::polymorphic_type>();
     Policy::methods.push_back(*this);
 }
 
@@ -798,7 +764,7 @@ template<typename ArgType>
 BOOST_FORCEINLINE auto
 method<Name(Parameters...), ReturnType, Policy>::vptr(const ArgType& arg) const
     -> const std::uintptr_t* {
-    if constexpr (is_virtual_ptr<ArgType>) {
+    if constexpr (detail::is_virtual_ptr<ArgType>) {
         return arg._vptr();
         // No need to check the method pointer: this was done when the
         // virtual_ptr was created.

@@ -66,6 +66,23 @@ struct Animal {
 
 struct Dog : Animal {};
 
+static_assert(std::is_same_v<virtual_ptr<Animal>::pointer_type, Animal*>);
+static_assert(std::is_same_v<virtual_ptr<Animal>::element_type, Animal>);
+static_assert(std::is_same_v<
+              decltype(std::declval<virtual_ptr<Animal>>().get()), Animal*>);
+static_assert(
+    std::is_same_v<decltype(*std::declval<virtual_ptr<Animal>>()), Animal&>);
+
+static_assert(
+    std::is_same_v<
+        virtual_shared_ptr<Animal>::pointer_type, std::shared_ptr<Animal>>);
+static_assert(std::is_same_v<virtual_shared_ptr<Animal>::element_type, Animal>);
+static_assert(std::is_same_v<
+              decltype(std::declval<virtual_shared_ptr<Animal>>().get()),
+              std::shared_ptr<Animal>>);
+static_assert(std::is_same_v<
+              decltype(*std::declval<virtual_shared_ptr<Animal>>()), Animal&>);
+
 BOOST_OPENMETHOD_CLASSES(Animal, Dog);
 
 namespace BOOST_OPENMETHOD_GENSYM {
@@ -193,6 +210,14 @@ BOOST_AUTO_TEST_CASE(test_virtual_shared_by_const_reference) {
         BOOST_CHECK(os.is_equal("bark"));
     }
 }
+
+BOOST_AUTO_TEST_CASE(test_final_virtual_shared) {
+    boost::openmethod::initialize();
+
+    auto ptr = make_virtual_shared<Dog>();
+    BOOST_TEST(ptr._vptr() == policies::default_::static_vptr<Dog>);
+}
+
 } // namespace BOOST_OPENMETHOD_GENSYM
 } // namespace BOOST_OPENMETHOD_GENSYM
 
@@ -224,4 +249,5 @@ BOOST_AUTO_TEST_CASE(test_virtual_ptr_non_polymorphic) {
         BOOST_CHECK(os.is_equal("bark"));
     }
 }
+
 } // namespace BOOST_OPENMETHOD_GENSYM

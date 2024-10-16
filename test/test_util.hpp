@@ -7,9 +7,9 @@
 template<int Name>
 struct test_policy_ :
 #ifdef NDEBUG
-    boost::openmethod::policies::release::rebind<test_policy_<Name>>
+    boost::openmethod::policies::release::fork<test_policy_<Name>>
 #else
-    boost::openmethod::policies::debug::rebind<test_policy_<Name>>
+    boost::openmethod::policies::debug::fork<test_policy_<Name>>
 #endif
 {
 };

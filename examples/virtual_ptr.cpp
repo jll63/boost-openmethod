@@ -17,15 +17,15 @@ struct Dog : Animal {};
 
 BOOST_OPENMETHOD_CLASSES(Animal, Cat, Dog);
 
-BOOST_OPENMETHOD(vocalize, (std::ostream&, virtual_ptr<Animal>), void);
+BOOST_OPENMETHOD(yell, (std::ostream&, virtual_ptr<Animal>), void);
 
 BOOST_OPENMETHOD_OVERRIDE(
-    vocalize, (std::ostream & os, virtual_ptr<Cat> cat), void) {
+    yell, (std::ostream & os, virtual_ptr<Cat> cat), void) {
     os << "hiss";
 }
 
 BOOST_OPENMETHOD_OVERRIDE(
-    vocalize, (std::ostream & os, virtual_ptr<Dog> dog), void) {
+    yell, (std::ostream & os, virtual_ptr<Dog> dog), void) {
     os << "bark";
 }
 
@@ -35,14 +35,14 @@ BOOST_OPENMETHOD(
 BOOST_OPENMETHOD_OVERRIDE(
     encounter, (std::ostream & os, virtual_ptr<Dog> dog, virtual_ptr<Cat> cat),
     void) {
-    vocalize(os, dog);
+    yell(os, dog);
     os << " and chase";
 }
 
 BOOST_OPENMETHOD_OVERRIDE(
     encounter, (std::ostream & os, virtual_ptr<Cat> cat, virtual_ptr<Dog> dog),
     void) {
-    vocalize(os, cat);
+    yell(os, cat);
     os << " and run";
 }
 
@@ -61,8 +61,8 @@ int main() {
     return 0;
 }
 
-void call_vocalize(std::ostream& os, virtual_ptr<Animal> a) {
-    vocalize(os, a);
+void call_yell(std::ostream& os, virtual_ptr<Animal> a) {
+    yell(os, a);
 }
 
 void call_encounter(

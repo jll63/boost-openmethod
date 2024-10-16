@@ -258,8 +258,8 @@ static_assert(std::is_same_v<
 // boost::openmethod::policies::basic_policy<boost::openmethod::policies::basic_domain<facets::key2>, boost::openmethod::policies::std_rtti>
 
 struct policy1 : basic_policy<policy1, std_rtti> {};
-struct policy2 : policy1::rebind<policy2> {};
-struct policy3 : policy1::rebind<policy3>::replace<std_rtti, alt_rtti> {};
+struct policy2 : policy1::fork<policy2> {};
+struct policy3 : policy1::fork<policy3>::replace<std_rtti, alt_rtti> {};
 
 static_assert(std::is_same_v<
     policy2::facets,
