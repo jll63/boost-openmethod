@@ -2,11 +2,23 @@
 # Reference
 :toc:
 :toc-title:
-:idprefix:
+:idprefix: ref_
 
 ## Headers
 
 ## Namespaces
+
+## Core
+
+include::method.adoc[]
+include::virtual_.adoc[]
+include::virtual_ptr.adoc[]
+
+## Policies & Facets
+
+include::basic_policy.adoc[]
+include::error_output.adoc[]
+include::rtti.adoc[]
 
 ## Macros
 
@@ -18,18 +30,3 @@ include::BOOST_OPENMETHOD_CLASSES.adoc[]
 include::BOOST_OPENMETHOD_DEFAULT_POLICY.adoc[]
 include::BOOST_OPENMETHOD_NAME.adoc[]
 include::BOOST_OPENMETHOD_OVERRIDERS.adoc[]
-
-## Core API
-
-include::method.adoc[]
-
-### virtual_
-
-### virtual_ptr
-
-## Policies & Facets
-
-### basic_policy
-
-include::error_output.adoc[]
-include::rtti.adoc[]

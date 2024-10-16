@@ -120,8 +120,8 @@ Cast `obj` using the `dynamic_cast` operator.
 
 ### deferred_static_rtti
 
-`deferred_static_rtti`, directs OpenMethod to defer collection of static type
-information until `initialize` is called. This makes it possible to interface
+`deferred_static_rtti` makes OpenMethod defer collection of static type
+information until `initialize` is called. This makes it possible to interoperate
 with custom RTTI systems that use static constructors to assign type
 information.
 

@@ -2,7 +2,7 @@
 # Tutorial
 :toc:
 :toc-title:
-:idprefix:
+:idprefix: tutorial_
 
 foo bar
 
@@ -231,7 +231,7 @@ the x64 architecture (variable names have been shortened for readability):
 	shr	    rdx, cl
 	mov	    rax, qword ptr [rip + vptrs]
 	mov	    rax, qword ptr [rax + 8*rdx]
-	mov	    rcx, qword ptr [rip + slots_strides]
+	mov	    rcx, qword ptr [rip + poke::slots_strides]
 	mov	    rax, qword ptr [rax + 8*rcx]
 	jmp	    rax
 ----
@@ -269,7 +269,7 @@ Micro benchmarks suggest that the overhead of dispatching an open-methods with a
 single virtual argument is between 30% and 50% slower than calling the
 equivalent virtual function, if the body is empty.
 
-## `virtual_ptr`
+## virtual_ptr
 
 The seven first instructions in the assembly code above look up the v-table for
 the object. The result will always be the same for the same object. Therefore,
@@ -280,20 +280,20 @@ and the other to the v-table. Incidentally, this is how Rust and Golang
 implement polymorphism.
 
 `virtual_ptr`{empty}s are used in place of `virtual_<&>`. They can be passed
-through to overriders, which can re-use them to make further method calls. For
-example:
+through to overriders, which can re-use them to make further method calls, or
+stored in objects. For example:
 
 [source,c++]
 ----
-BOOST_OPENMETHOD(vocalize, (std::ostream&, virtual_ptr<Animal>), void);
+BOOST_OPENMETHOD(yell, (std::ostream&, virtual_ptr<Animal>), void);
 
 BOOST_OPENMETHOD_OVERRIDE(
-    vocalize, (std::ostream & os, virtual_ptr<Cat> cat), void) {
+    yell, (std::ostream & os, virtual_ptr<Cat> cat), void) {
     os << "hiss";
 }
 
 BOOST_OPENMETHOD_OVERRIDE(
-    vocalize, (std::ostream & os, virtual_ptr<Dog> dog), void) {
+    yell, (std::ostream & os, virtual_ptr<Dog> dog), void) {
     os << "bark";
 }
 
@@ -303,23 +303,23 @@ BOOST_OPENMETHOD(
 BOOST_OPENMETHOD_OVERRIDE(
     encounter, (std::ostream & os, virtual_ptr<Dog> dog, virtual_ptr<Cat> cat),
     void) {
-    vocalize(os, dog);
+    yell(os, dog);
     os << " and chase";
 }
 
 BOOST_OPENMETHOD_OVERRIDE(
     encounter, (std::ostream & os, virtual_ptr<Cat> cat, virtual_ptr<Dog> dog),
     void) {
-    vocalize(os, cat);
+    yell(os, cat);
     os << " and run";
 }
 ----
 
-Calls to `vocalize` compile to three instructions:
+Calls to `yell` compile to three instructions:
 
 [source,asm]
 ----
-	mov	rax, qword ptr [rip + slots_strides]
+	mov	rax, qword ptr [rip + yell::slots_strides]
 	mov	rax, qword ptr [rdx + 8*rax]
 	jmp	rax
 ----

@@ -2,6 +2,33 @@
 [#method]
 ### method
 
+`method` is a class template that represents an open method. It contains a singleton named `fn`, a function object that
+selects an overrider to call based on the dynamic type of the arguments corresponding to virtual formal parameters.
+
+The overrider is selected in a process similar to overloaded function resolution, with extra rules to handle ambiguitues. It proceeds as follows:
+
+1. Form the set of all applicable overriders. An overrider is applicable if it
+   can be called with the arguments passed to the method.
+
+2. If the set is empty, call the error handler (if present in the policy), then
+   terminate the program with `abort`
+
+3. Remove the overriders that are dominated by other overriders in the set.
+   Overrider A dominates overrider B if any of its virtual formal parameters is more specialized than B's, and if none of B's virtual parameters is more
+   specialized than A's.
+
+4. If the resulting set contains only one overrider, call it.
+
+5. If the return type is a registered polymorphic type, remove all the overriders that
+   return a less specific type than the others.
+
+6. If the resulting set contains only one overrider, call it.
+
+7. Otherwise, call one of the remaining overriders. Which overrider is selected is
+  not specified, but it is the same across calls with the same arguments types.
+
+#### Synopsis
+
 ```c++
 namespace boost {
 namespace openmethod {
@@ -14,17 +41,18 @@ class method;
 template<typename Name, typename... Parameters, typename ReturnType, class Policy>
 class method<Name(Parameters...), ReturnType, Policy> {
   public:
-    template<auto... Functions>
-    struct override;
-
     method();
     method(const method&) = delete;
     method(method&&) = delete;
+
     ~method();
 
     auto operator()(remove_virtual<Parameters>... args) const -> ReturnType;
 
     static method fn;
+
+    template<auto... Functions>
+    struct override;
 
     template<auto>
     static function_type next;
@@ -52,31 +80,6 @@ class method<Name(Parameters...), ReturnType, Policy> {
 | The policy.
 
 |===
-
-`method` is a class template that represents an open method. It contains a singleton named `fn`, a function object that
-selects an overrider to call based on the dynamic type of the arguments corresponding to virtual formal parameters.
-
-The overrider is selected in a process similar to overloaded function resolution, with extra rules to handle ambiguitues. It proceeds as follows:
-
-1. Form the set of all applicable overriders. An overrider is applicable if it
-   can be called with the arguments passed to the method.
-
-2. If the set is empty, call the error handler (if present in the policy), then
-   terminate the program with `abort`
-
-3. Remove the overriders that are dominated by other overriders in the set.
-   Overrider A dominates overrider B if any of its virtual formal parameters is more specialized than B's, and if none of B's virtual parameters is more
-   specialized than A's.
-
-4. If the resulting set contains only one overrider, call it.
-
-5. If the return type is a registered polymorphic type, remove all the overriders that
-   return a less specific type than the others.
-
-6. If the resulting set contains only one overrider, call it.
-
-7. Otherwise, call one of the remaining overriders. Which overrider is selected is
-  not specified, but it is the same across calls with the same arguments types.
 
 #### constructor
 
@@ -125,12 +128,12 @@ auto operator()(remove_virtual<Parameters>... args) const -> ReturnType;
 Call the method with the arguments `args`.
 
 `remove_virtual` is a metafunction that removes the `virtual_` decorator from a type `T`. If `T` is in the form
-`virtual_<U>`, it evaluates to `U`. Otherwise, it evaluates to `T`.
+`virtual_<U>`, it evaluates to `U`. Otherwise, izt evaluates to `T`.
 
 #### fn
 
 ```c++
 method fn;
-```z
+```
 
-The only instance of the method, and the entry point for calling the method.
+The entry point for calling the method.

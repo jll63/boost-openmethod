@@ -1,0 +1,49 @@
+
+[#virtual_]
+### virtual_
+
+Indicate that a formal parameter of an open-method is virtual.
+
+#### Synopsis
+
+```c++
+namespace boost {
+namespace openmethod {
+
+template<typename T>
+struct virtual_;
+
+}}
+```
+
+#### Description
+
+*Template Parameters*
+
+[cols="1,1"]
+|===
+
+| _T_
+| The type of the virtual parameter.
+
+|===
+
+When a method is called, the dynamic types of the objects in the argument list
+that correspond to virtual parameters in the method's formal parameter list is
+used to determine the appropriate overrider to call.
+
+The signature of `method::fn` is the same as the signature passed to the
+`method` template, without the `virtual_` decorators.
+
+`T` is a reference, in the general sense, to a class registered with the method's policy. The following examples are all valid:
+
+* `virtual_<Class&>`
+* `virtual_<Class&&>`
+* `virtual_<const Class&>`
+* `virtual_<std::shared_ptr<Class>>`
+* `virtual_<std::shared_ptr<const Class>>`
+* `virtual_<const std::shared_ptr<Class>&>`
+* `virtual_<const std::shared_ptr<const Class>&>`
+
+Passing a `const std::shared_ptr<Class>&` as a virtual argument via a may
+necessitate the creation of a temporary copy of the smart pointer.
